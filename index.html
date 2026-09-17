@@ -374,41 +374,6 @@
 
 <div class="wrap">
 
-  <section id="log-entry">
-    <div class="eyebrow">Log</div>
-    <h2 class="sec-title">Log an odometer reading</h2>
-    <div class="card">
-      <form id="entryForm">
-        <div class="grid">
-          <div class="field">
-            <label for="f-date">Date</label>
-            <input type="date" id="f-date" required>
-          </div>
-          <div class="field">
-            <label for="f-odo">Odometer (km)</label>
-            <input type="number" id="f-odo" min="0" step="1" required placeholder="e.g. 14250">
-          </div>
-          <div class="field">
-            <label for="f-kwh">kWh charged — optional</label>
-            <input type="number" id="f-kwh" min="0" step="0.01" placeholder="blank = use default rate">
-          </div>
-          <div class="field">
-            <label for="f-fuelprice">Gasoline price €/L — optional</label>
-            <input type="number" id="f-fuelprice" min="0" step="0.01" placeholder="blank = use default price">
-          </div>
-          <div class="field" style="grid-column:span 2;">
-            <label for="f-notes">Notes — optional</label>
-            <input type="text" id="f-notes" placeholder="e.g. after weekend trip">
-          </div>
-        </div>
-        <div class="form-actions">
-          <button type="submit" class="btn">Add entry</button>
-          <span class="status-msg" id="formStatus">Logging km for <strong id="formSourceName">Tesla</strong> — every other vehicle is calculated automatically.</span>
-        </div>
-      </form>
-    </div>
-  </section>
-
   <section id="comparison">
     <div class="sec-head">
       <div>
@@ -554,6 +519,41 @@
     <div id="adminUnlocked" style="display:none;">
       <div class="eyebrow">Admin</div>
       <h2 class="sec-title">Vehicles &amp; settings</h2>
+      <section id="log-entry" style="padding-top:0;border-bottom:none;">
+    <div class="eyebrow">Log</div>
+    <h2 class="sec-title">Log an odometer reading</h2>
+    <div class="card">
+      <form id="entryForm">
+        <div class="grid">
+          <div class="field">
+            <label for="f-date">Date</label>
+            <input type="date" id="f-date" required>
+          </div>
+          <div class="field">
+            <label for="f-odo">Odometer (km)</label>
+            <input type="number" id="f-odo" min="0" step="1" required placeholder="e.g. 14250">
+          </div>
+          <div class="field">
+            <label for="f-kwh">kWh charged — optional</label>
+            <input type="number" id="f-kwh" min="0" step="0.01" placeholder="blank = use default rate">
+          </div>
+          <div class="field">
+            <label for="f-fuelprice">Gasoline price €/L — optional</label>
+            <input type="number" id="f-fuelprice" min="0" step="0.01" placeholder="blank = use default price">
+          </div>
+          <div class="field" style="grid-column:span 2;">
+            <label for="f-notes">Notes — optional</label>
+            <input type="text" id="f-notes" placeholder="e.g. after weekend trip">
+          </div>
+        </div>
+        <div class="form-actions">
+          <button type="submit" class="btn">Add entry</button>
+          <span class="status-msg" id="formStatus">Logging km for <strong id="formSourceName">Tesla</strong> — every other vehicle is calculated automatically.</span>
+        </div>
+      </form>
+    </div>
+      </section>
+
 
       <div class="card">
         <div class="admin-section">
@@ -594,17 +594,8 @@
 
       <div class="card" style="margin-top:1.25rem;">
         <div class="admin-section" style="margin-bottom:0;">
-          <h4><span class="dot"></span>Google Sheets sync (optional)</h4>
-          <div class="grid">
-            <div class="field" style="grid-column:1/-1;">
-              <label for="s-scripturl">Apps Script web app URL</label>
-              <input type="text" id="s-scripturl" placeholder="https://script.google.com/macros/s/.../exec">
-            </div>
-          </div>
-          <div class="form-actions">
-            <button type="button" class="btn ghost" id="connectSheetBtn">Connect &amp; sync</button>
-            <span class="status-msg" id="syncStatus">Not connected — using local storage only</span>
-          </div>
+          <h4><span class="dot"></span>Google Sheets sync</h4>
+          <div class="status-msg" id="syncStatus">Connecting…</div>
         </div>
       </div>
 
@@ -642,6 +633,7 @@
   const LS_PASSWORD = 'tp_admin_pw';
   const SS_AUTH = 'tp_admin_auth';
   const DEFAULT_PASSWORD = 'panda2008';
+  const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyyWpaQ7rvtQD54L0eYOmmNG6VrlSRf8rNBeaZ9pFDCHFoSzjKnmEMIq9YYMPW_yyDI/exec';
 
   const CAR_SVG = `<svg viewBox="0 0 400 140" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path d="M20 108 L20 70 C 20 58, 30 50, 44 48 L 70 46 C 78 34, 92 26, 108 26 L 250 26 C 266 26, 278 34, 284 46 L 320 50 C 340 52, 356 58, 368 70 L 380 80 L 382 106" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
@@ -680,7 +672,7 @@
   }
 
   const defaultInfra = { solar:0, batteries:0, inverter:0, socket:0, wallbox:0, misc:0 };
-  const defaultSettings = { startOdometer:0, vehicles:seedVehicles(), compareVehicleId:'panda', infra:{...defaultInfra}, scriptUrl:'' };
+  const defaultSettings = { startOdometer:0, vehicles:seedVehicles(), compareVehicleId:'panda', infra:{...defaultInfra}, scriptUrl:SCRIPT_URL };
 
   function migrateOldFlatSettings(raw){
     // upgrades the old tesla*/panda* flat-field settings (v2) into the vehicles model (v3)
@@ -700,7 +692,7 @@
       ],
       compareVehicleId:'panda',
       infra: raw.infra || {...defaultInfra},
-      scriptUrl: raw.scriptUrl||''
+      scriptUrl: SCRIPT_URL
     };
   }
 
@@ -725,6 +717,7 @@
   function saveEntries(list){ localStorage.setItem(LS_ENTRIES, JSON.stringify(list)); }
 
   let settings = loadSettings();
+  settings.scriptUrl = SCRIPT_URL; // hardcoded — ignore anything stored
   let entries = loadEntries();
   let draftVehicles = JSON.parse(JSON.stringify(settings.vehicles));
 
@@ -891,13 +884,13 @@
     ['s-infra-solar','s-infra-batteries','s-infra-inverter','s-infra-socket','s-infra-wallbox','s-infra-misc'].forEach(id=>{
       document.getElementById(id).addEventListener('input', updateInfraPreview);
     });
-    document.getElementById('s-scripturl').value = settings.scriptUrl;
-    document.getElementById('syncStatus').textContent = settings.scriptUrl? 'Connected to Google Sheets' : 'Not connected — using local storage only';
+    const syncEl = document.getElementById('syncStatus');
+    if(syncEl && syncEl.textContent.indexOf('Connecting')===0) syncEl.textContent = 'Connected to Google Sheets';
   }
 
   document.getElementById('f-date').valueAsDate = new Date();
 
-  if(settings.scriptUrl){ fetchSettingsFromSheet().then(fetchFromSheet); }
+  fetchSettingsFromSheet().then(fetchFromSheet);
 
   document.getElementById('saveSettingsBtn').addEventListener('click', ()=>{
     if(!draftVehicles.some(v=>v.isSource)) draftVehicles[0].isSource = true;
@@ -909,7 +902,7 @@
       settings.compareVehicleId = firstNonSource? firstNonSource.id : settings.vehicles[0].id;
     }
     saveSettings(settings);
-    document.getElementById('settingsStatus').textContent = settings.scriptUrl? 'Saving…' : 'Saved ✓';
+    document.getElementById('settingsStatus').textContent = 'Saving…';
     populateCompareSelect();
     render();
     pushSettingsToSheet().then(()=>{
@@ -926,16 +919,6 @@
     setTimeout(()=>document.getElementById('pwChangeStatus').textContent='',2000);
   });
 
-  document.getElementById('connectSheetBtn').addEventListener('click', ()=>{
-    settings.scriptUrl = document.getElementById('s-scripturl').value.trim();
-    saveSettings(settings);
-    if(settings.scriptUrl){
-      document.getElementById('syncStatus').textContent = 'Connecting…';
-      fetchSettingsFromSheet().then(()=>{ populateAdminFields(); fetchFromSheet(); });
-    } else {
-      document.getElementById('syncStatus').textContent = 'Not connected — using local storage only';
-    }
-  });
 
   function syncableSettings(){
     // scriptUrl stays local (circular), password is never stored remotely
@@ -969,7 +952,7 @@
       .then(r=>r.json())
       .then(res=>{
         if(res && res.status==='ok' && res.settings && res.settings.vehicles && res.settings.vehicles.length){
-          const local = { scriptUrl: settings.scriptUrl };
+          const local = { scriptUrl: SCRIPT_URL };
           settings = Object.assign({}, defaultSettings, res.settings, local);
           if(!settings.infra) settings.infra = {...defaultInfra};
           saveSettings(settings);

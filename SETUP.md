@@ -26,15 +26,23 @@ devices/people, connect it to a Google Sheet — takes about 5 minutes.
 5. Copy the **Web app URL** it gives you — looks like
    `https://script.google.com/macros/s/AKfycb.../exec`.
 
-## 4. Connect it in the site
+## 4. Using the site
+The script URL is now hardcoded into `index.html`, so there's nothing to
+paste in — it connects on load automatically.
+
 1. Open `index.html` in your browser.
 2. Click **Admin** in the top-right, enter the admin password (default:
    `panda2008` — change it right away under "Change admin password").
-3. Under "Google Sheets sync", paste the Web app URL and click
-   **Connect & sync**.
+3. Odometer readings are logged from the Admin tab, so only someone with the
+   password can add entries. The Tracker tab is read-only.
 
-From then on, new entries are written straight to the Sheet, and reloading
-the page pulls the latest rows back in.
+If you ever redeploy and get a new script URL, update the `SCRIPT_URL`
+constant near the top of the `<script>` block in `index.html`.
+
+**Note on the hardcoded URL:** anyone who opens `index.html` can read it in
+the page source, and the web app is deployed as "anyone with the link" — so
+anyone you share the file with can read and write your Sheet directly. The
+admin password gates the UI, not the underlying Sheet access.
 
 ## Notes
 - The Admin tab (rates + Sheets URL + password) is protected by a simple
