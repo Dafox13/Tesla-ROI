@@ -54,118 +54,57 @@
   }
   .topnav button.active{background:var(--tesla);color:#04201B;}
 
-  /* ---------- HERO ---------- */
-  .hero{
-    position:relative;
-    display:grid;
-    grid-template-columns:1fr 1fr;
-    min-height:78vh;
-    overflow:hidden;
+  /* ---------- HEADER ---------- */
+  .duel-header{
+    padding:2.75rem 0 2.25rem;
     border-bottom:1px solid var(--line);
+    background:linear-gradient(180deg, var(--card) 0%, var(--bg-void) 100%);
   }
-  .hero-side{
-    position:relative;
-    display:flex;
-    flex-direction:column;
-    justify-content:flex-end;
-    padding:2.5rem;
-    overflow:hidden;
+  .duel-row{
+    display:grid;
+    grid-template-columns:1fr auto 1fr;
+    align-items:center;
+    gap:1.25rem;
   }
-  .hero-side.src{
-    background:radial-gradient(120% 100% at 100% 0%, var(--tesla-dim) 0%, var(--bg-void) 60%);
-  }
-  .hero-side.cmp{
-    background:radial-gradient(120% 100% at 0% 0%, var(--panda-dim) 0%, var(--bg-void) 60%);
-  }
-  .car-art{
-    position:absolute;
-    top:50%;
-    width:64%;
-    transform:translateY(-58%);
-    opacity:.9;
-  }
-  .src .car-art{right:-6%;}
-  .cmp .car-art{left:-6%;transform:translateY(-58%) scaleX(-1);}
-  .car-art svg{width:100%;height:auto;display:block;}
+  .duel-side{ min-width:0; }
+  .duel-side.cmp{ text-align:right; }
   .side-label{
     font-size:.72rem;
-    letter-spacing:.22em;
+    letter-spacing:.18em;
     text-transform:uppercase;
     color:var(--muted);
-    margin-bottom:.4rem;
+    margin-bottom:.3rem;
   }
   .side-title{
-    font-size:clamp(2.2rem,5.4vw,4rem);
-    line-height:.96;
-    position:relative;
-    z-index:2;
-  }
-  .src .side-title{color:var(--tesla);text-shadow:0 0 40px var(--tesla-glow);}
-  .cmp .side-title{color:var(--panda);text-shadow:0 0 40px var(--panda-glow);}
-  .side-sub{
-    margin-top:.6rem;
-    color:var(--muted);
-    font-size:.92rem;
-    max-width:26ch;
-    position:relative;
-    z-index:2;
-  }
-  .cmp .side-label,
-  .cmp .side-title,
-  .cmp .side-sub{
-    text-align:right;
-    margin-left:auto;
-  }
-
-  .seam{
-    position:absolute;
-    left:50%;
-    top:0;
-    bottom:0;
-    width:1px;
-    background:linear-gradient(to bottom, transparent, var(--line) 12%, var(--line) 88%, transparent);
-    z-index:5;
-  }
-  .scoreboard{
-    position:absolute;
-    left:50%;
-    top:1.1rem;
-    transform:translateX(-50%);
-    z-index:10;
-    text-align:center;
-    background:var(--card);
-    border:1px solid var(--line);
-    border-radius:10px;
-    padding:.6rem 1rem;
-    box-shadow:0 20px 60px rgba(0,0,0,.5);
-    display:flex;
-    align-items:center;
-    gap:.6rem;
-  }
-  .scoreboard .vs{
     font-family:'Bebas Neue',sans-serif;
-    font-size:1rem;
-    letter-spacing:.3em;
+    letter-spacing:.02em;
+    font-size:clamp(1.4rem,3.4vw,2.1rem);
+    line-height:1.05;
+    overflow-wrap:break-word;
+  }
+  .src .side-title{color:var(--tesla);}
+  .cmp .side-title{color:var(--panda);}
+  .duel-vs{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:.4rem;
+  }
+  .duel-vs .vs{
+    font-family:'Bebas Neue',sans-serif;
+    font-size:.85rem;
+    letter-spacing:.25em;
     color:var(--muted);
   }
-  .scoreboard select{
-    background:var(--bg-void-2);
-    border:1px solid var(--line);
-    color:var(--paper);
-    border-radius:6px;
-    padding:.3rem .5rem;
-    font-family:'Inter';
+  .duel-vs select{
+    max-width:140px;
     font-size:.72rem;
-    max-width:120px;
+    padding:.4rem .5rem;
   }
   .savings-tick{
-    position:absolute;
-    left:50%;
-    bottom:2.2rem;
-    transform:translateX(-50%);
-    z-index:10;
     text-align:center;
-    width:min(92vw,420px);
+    margin:1.75rem auto 0;
+    max-width:420px;
   }
   .savings-tick .st-label{
     font-size:.68rem;
@@ -175,8 +114,9 @@
     margin-bottom:.35rem;
   }
   .savings-tick .st-value{
-    font-size:clamp(2rem,5vw,3.2rem);
+    font-size:clamp(2rem,5vw,2.8rem);
     font-weight:700;
+    font-family:'Space Mono',monospace;
   }
   .st-value.pos{color:var(--tesla);}
   .st-value.neg{color:var(--loss);}
@@ -341,31 +281,15 @@
     .topnav{ top:.6rem; right:.6rem; padding:.2rem; }
     .topnav button{ padding:.4rem .75rem; font-size:.72rem; }
 
-    .hero{
+    .duel-header{ padding-top:4.4rem; }
+    .duel-row{
       grid-template-columns:1fr;
-      min-height:auto;
-      padding-top:3.6rem; /* clear the fixed topnav */
+      justify-items:center;
+      text-align:center;
+      gap:.9rem;
     }
-    .seam{ display:none; }
-    .hero-side{ min-height:44vh; padding:1.75rem 1.5rem; }
-    .car-art{ width:56%; }
-    .side-title{ font-size:clamp(2rem,9vw,3rem); }
-
-    .scoreboard{
-      position:static;
-      margin:0 auto 0;
-      width:max-content;
-      transform:none;
-      top:auto;
-    }
-    .savings-tick{
-      position:static;
-      margin:1.5rem auto 1.75rem;
-      width:auto;
-      max-width:min(92vw,420px);
-      transform:none;
-      left:auto; bottom:auto;
-    }
+    .duel-side.cmp{ text-align:center; }
+    .duel-vs{ flex-direction:row; gap:.6rem; }
 
     .wrap{ padding:0 1.1rem; }
     section{ padding:2.75rem 0; }
@@ -400,35 +324,33 @@
 
 <div id="trackerView">
 
-<div class="hero">
-  <div class="seam"></div>
-  <div class="scoreboard">
-    <span class="vs">VS</span>
-    <select id="compareSelect"></select>
-  </div>
+<div class="duel-header">
+  <div class="wrap">
+    <div class="duel-row">
+      <div class="duel-side src">
+        <div class="side-label" id="srcLabel">Logged</div>
+        <h1 class="side-title" id="srcTitle">Tesla Model 3</h1>
+      </div>
+      <div class="duel-vs">
+        <span class="vs">VS</span>
+        <select id="compareSelect"></select>
+      </div>
+      <div class="duel-side cmp">
+        <div class="side-label" id="cmpLabel">Calculated</div>
+        <h1 class="side-title" id="cmpTitle">Fiat Panda</h1>
+      </div>
+    </div>
 
-  <div class="hero-side src">
-    <div class="car-art" id="srcArt"></div>
-    <div class="side-label" id="srcLabel">Daily driver · logged</div>
-    <h1 class="side-title" id="srcTitle">TESLA<br>MODEL&nbsp;3</h1>
-    <p class="side-sub">Every km, converted into actual running cost automatically.</p>
-  </div>
-
-  <div class="hero-side cmp">
-    <div class="car-art" id="cmpArt"></div>
-    <div class="side-label" id="cmpLabel">Hypothetical · calculated</div>
-    <h1 class="side-title" id="cmpTitle">FIAT<br>PANDA</h1>
-    <p class="side-sub">What the same km would still be costing, worked out automatically.</p>
-  </div>
-
-  <div class="savings-tick">
-    <div class="st-label">Net saved by switching</div>
-    <div class="st-value mono pos" id="netSavingsValue">€0.00</div>
-    <div class="st-note" id="netSavingsNote">Log your first entry to start the count</div>
+    <div class="savings-tick">
+      <div class="st-label">Net saved by switching</div>
+      <div class="st-value mono pos" id="netSavingsValue">€0.00</div>
+      <div class="st-note" id="netSavingsNote">Log your first entry to start the count</div>
+    </div>
   </div>
 </div>
 
 <div class="wrap">
+
 
   <section id="comparison">
     <div class="sec-head">
@@ -693,31 +615,6 @@
   const DEFAULT_PASSWORD = 'panda2008';
   const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyyWpaQ7rvtQD54L0eYOmmNG6VrlSRf8rNBeaZ9pFDCHFoSzjKnmEMIq9YYMPW_yyDI/exec';
 
-  const CAR_SVG = `<svg viewBox="0 0 400 140" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M20 108 L20 70 C 20 58, 30 50, 44 48 L 70 46 C 78 34, 92 26, 108 26 L 250 26 C 266 26, 278 34, 284 46 L 320 50 C 340 52, 356 58, 368 70 L 380 80 L 382 106" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
-    <path d="M20 108 L382 106 L382 112 L20 112 Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
-    <path d="M96 48 L96 26 M204 48 L204 27" stroke="currentColor" stroke-width="1.5" opacity=".6"/>
-    <circle cx="88" cy="112" r="17" stroke="currentColor" stroke-width="2"/>
-    <circle cx="320" cy="112" r="17" stroke="currentColor" stroke-width="2"/>
-    <rect x="52" y="60" width="30" height="18" rx="2" stroke="currentColor" stroke-width="1.5" opacity=".7"/>
-  </svg>`;
-  const SPORTY_SVG = `<svg viewBox="0 0 400 140" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M10 105 C 10 95, 25 90, 45 88 C 70 60, 110 40, 160 38 C 210 36, 250 42, 285 60 C 320 64, 360 72, 385 90 C 392 94, 392 102, 385 106 L 370 108 C 368 96, 356 88, 344 88 C 332 88, 322 96, 320 108 L 130 108 C 128 96, 116 88, 104 88 C 92 88, 82 96, 80 108 L 40 106 C 20 106, 10 106, 10 105 Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
-    <circle cx="104" cy="110" r="16" stroke="currentColor" stroke-width="2"/>
-    <circle cx="344" cy="110" r="16" stroke="currentColor" stroke-width="2"/>
-    <path d="M160 40 C 180 32, 230 32, 270 46" stroke="currentColor" stroke-width="1.5" opacity=".6"/>
-  </svg>`;
-  const MOTO_SVG = `<svg viewBox="0 0 400 140" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <circle cx="80" cy="108" r="26" stroke="currentColor" stroke-width="2"/>
-    <circle cx="320" cy="108" r="26" stroke="currentColor" stroke-width="2"/>
-    <path d="M80 108 L170 108 L215 60 L260 60" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-    <path d="M170 108 L235 108 L320 108" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-    <path d="M235 108 L255 70 L300 70" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-    <path d="M255 70 C 255 55, 275 50, 285 58" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-    <rect x="150" y="88" width="55" height="16" rx="6" stroke="currentColor" stroke-width="1.5" opacity=".7"/>
-  </svg>`;
-  const SHAPE_SVG = { car: CAR_SVG, sporty: SPORTY_SVG, motorcycle: MOTO_SVG };
-
   function seedVehicles(){
     return [
       { id:'tesla', name:'Tesla Model 3', shape:'sporty', fuelType:'electric',
@@ -865,13 +762,6 @@
         </div>
         <div class="grid">
           <div class="field"><label>Name</label><input type="text" class="v-name" data-idx="${idx}" value="${v.name||''}"></div>
-          <div class="field"><label>Shape</label>
-            <select class="v-shape" data-idx="${idx}">
-              <option value="sporty" ${v.shape==='sporty'?'selected':''}>Sporty car</option>
-              <option value="car" ${v.shape==='car'?'selected':''}>Boxy car</option>
-              <option value="motorcycle" ${v.shape==='motorcycle'?'selected':''}>Motorcycle</option>
-            </select>
-          </div>
           <div class="field"><label>Fuel type</label>
             <select class="v-fueltype" data-idx="${idx}">
               <option value="electric" ${v.fuelType==='electric'?'selected':''}>Electric (kWh)</option>
@@ -892,7 +782,6 @@
     });
 
     container.querySelectorAll('.v-name').forEach(el=>el.addEventListener('input',e=>{ draftVehicles[e.target.dataset.idx].name=e.target.value; }));
-    container.querySelectorAll('.v-shape').forEach(el=>el.addEventListener('change',e=>{ draftVehicles[e.target.dataset.idx].shape=e.target.value; }));
     container.querySelectorAll('.v-fueltype').forEach(el=>el.addEventListener('change',e=>{
       draftVehicles[e.target.dataset.idx].fuelType=e.target.value; renderVehicleList();
     }));
@@ -1150,11 +1039,6 @@
     });
   });
 
-  function setVehicleArt(containerId, vehicle, fallbackShapeKey){
-    const container = document.getElementById(containerId);
-    container.innerHTML = SHAPE_SVG[vehicle.shape] || SHAPE_SVG[fallbackShapeKey];
-  }
-
   function render(){
     const source = getSourceVehicle();
     const compare = getCompareVehicle();
@@ -1176,11 +1060,9 @@
     const cmpCost = vehicleCost(compare, withKm, fixedCostYears);
     const netSavings = cmpCost.total - srcCost.total;
 
-    /* ---- hero ---- */
-    setVehicleArt('srcArt', source, 'sporty');
-    setVehicleArt('cmpArt', compare, 'car');
-    document.getElementById('srcTitle').innerHTML = source.name.toUpperCase().split(' ').join('<br>');
-    document.getElementById('cmpTitle').innerHTML = compare.name.toUpperCase().split(' ').join('<br>');
+    /* ---- header ---- */
+    document.getElementById('srcTitle').textContent = source.name;
+    document.getElementById('cmpTitle').textContent = compare.name;
     document.getElementById('formSourceName') && (document.getElementById('formSourceName').textContent = source.name);
 
     const nsEl = document.getElementById('netSavingsValue');
