@@ -59,6 +59,19 @@ admin password gates the UI, not the underlying Sheet access.
   are calculated on the fly from the rates you set in Admin, so nothing
   else needs to be stored per entry.
 
+## Admin-only editing
+Logging new odometer readings and removing existing entries both now live in
+the **Admin** tab (password-gated), alongside the vehicle rates. The main
+page is read-only — anyone with the link can see the comparison, but only
+someone with the admin password can add or remove entries or change which
+vehicle is being compared against.
+
+## Deleting entries
+Removing a row now actually deletes it from the Google Sheet (previously it
+only removed it from your browser, so it silently reappeared on the next
+reload — that's fixed). This needs the updated `Code.gs` redeployed (Deploy
+→ Manage deployments → Edit → New version).
+
 ## Per-entry overrides
 When logging an entry you can optionally enter the **kWh charged** and the
 **gasoline price (€/L)** at that time:
@@ -102,3 +115,54 @@ created automatically on first save.
   New version) since it adds new actions.
 - Don't edit the Settings tab by hand — it holds a single JSON value in A1
   that the app writes and reads.
+
+## Break-even projection
+The projected break-even date treats two kinds of savings differently, to
+match how costs are actually charged elsewhere in the app:
+
+- **Fuel/energy savings** accrue continuously, day by day, based on your
+  average km/day so far.
+- **Insurance, maintenance, and road tax savings** land in a single lump
+  once a year (matching the "full year charged upfront" rule used for the
+  cost totals) — not smeared into a daily average.
+
+The projection simulates forward: continuous fuel savings build up until
+the next yearly boundary, at which point that year's fixed-cost gap gets
+added in one jump — repeating until the total clears what you spent
+switching. If neither is actually closing the gap, it says so instead of
+showing a misleading date.
+
+## Free charging
+The Admin entry form has a checkbox for stretches driven on free charging
+(e.g. bundled Supercharger km from the purchase). Ticking it zeroes the
+source vehicle's energy cost for that entry only — the comparison vehicle
+still costs as normal for the same km, since those km would still have
+needed fuel on a car you didn't buy. Marked entries show a small "⚡free"
+tag in the history table.
+
+If you're using Sheets sync, add a `Free_Energy` column between `Fuel_Price`
+and `Notes` in your existing sheet (or delete the `Entries` tab and let the
+script recreate it), and redeploy the updated `Code.gs`.
+
+## Quick calculator
+The main page has a small calculator: type in a km figure (driven, or
+hypothetical) and it instantly shows what that would cost on the source
+vehicle vs whichever vehicle is selected for comparison. It always uses
+each vehicle's default Admin rate — no per-entry overrides, no free-charging
+exemption — and nothing it calculates is saved or logged anywhere.
+
+## Language toggle
+A PT/EN button sits in the top-right nav. It switches every label, button,
+heading, and status message across both the Tracker and Admin views between
+English and Portuguese, and remembers your choice for next time (stored in
+the browser, not synced to the Sheet). Vehicle names, notes, and anything
+you've typed in yourself stay exactly as you wrote them — only the app's
+own interface text translates.
+
+## All vehicles table
+Below the head-to-head comparison, a new table ranks every vehicle you've
+set up (not just the two currently duelling) by total cost so far — cheapest
+first — with columns for the energy/fuel, maintenance, insurance, and road
+tax breakdown, plus €/km and €/month. The source vehicle and whichever one
+is currently selected for comparison are badged so you can spot them at a
+glance.

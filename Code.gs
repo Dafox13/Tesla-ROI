@@ -1,7 +1,8 @@
-// Tesla vs Panda ROI tracker — Google Apps Script backend
+// Vehicle Running Cost Duel — Google Apps Script backend
 // Paste this into Extensions > Apps Script on your Google Sheet, then deploy as a Web App.
-// This script stores your odometer log entries (date, odometer, optional kWh and
-// fuel price, notes). All costs are calculated in the page itself from Admin rates.
+// Stores odometer log entries (date, odometer, optional kWh and fuel price, notes) and
+// the app's Admin settings (vehicles, rates, infra costs). All cost math happens in the
+// page itself — this script is just storage.
 
 const SHEET_NAME = 'Entries';
 const SETTINGS_SHEET_NAME = 'Settings';
@@ -12,14 +13,28 @@ function doGet(e) {
 
   if (e.parameter.action === 'add') {
     sheet.appendRow([
-      new Date(),                        // Timestamp
+      new Date(),                        // Timestamp — also doubles as this row's unique id
       e.parameter.date || '',             // Date
       Number(e.parameter.odometer) || 0,  // Odometer_km
       e.parameter.kwh === '' ? '' : Number(e.parameter.kwh),             // kWh (optional)
       e.parameter.fuelPrice === '' ? '' : Number(e.parameter.fuelPrice), // Fuel_Price (optional)
+      e.parameter.freeEnergy === 'true',  // Free_Energy (source vehicle's energy cost excluded)
       e.parameter.notes || ''             // Notes
     ]);
     return jsonOut_({ status: 'ok' });
+  }
+
+  if (e.parameter.action === 'delete') {
+    const id = e.parameter.entryId || '';
+    const data = sheet.getDataRange().getValues();
+    for (let i = 1; i < data.length; i++) { // row 0 is the header
+      const cellDate = data[i][0];
+      if (cellDate instanceof Date && cellDate.toISOString() === id) {
+        sheet.deleteRow(i + 1); // sheet rows are 1-indexed
+        return jsonOut_({ status: 'ok' });
+      }
+    }
+    return jsonOut_({ status: 'error', message: 'Entry not found (already deleted, or added before this feature existed)' });
   }
 
   if (e.parameter.action === 'getSettings') {
@@ -33,6 +48,7 @@ function doGet(e) {
     }
   }
 
+  // default: list all entries
   const data = sheet.getDataRange().getValues();
   const headers = data.shift();
   const rows = data.map(row => {
@@ -75,7 +91,7 @@ function getSheet_() {
   let sheet = ss.getSheetByName(SHEET_NAME);
   if (!sheet) {
     sheet = ss.insertSheet(SHEET_NAME);
-    sheet.appendRow(['Timestamp','Date','Odometer_km','kWh','Fuel_Price','Notes']);
+    sheet.appendRow(['Timestamp','Date','Odometer_km','kWh','Fuel_Price','Free_Energy','Notes']);
   }
   return sheet;
 }

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Vehicle Running Cost Duel</title>
+<title>Tesla ROI</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:wght@400;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -96,11 +96,6 @@
     letter-spacing:.25em;
     color:var(--muted);
   }
-  .duel-vs select{
-    max-width:140px;
-    font-size:.72rem;
-    padding:.4rem .5rem;
-  }
   .savings-tick{
     text-align:center;
     margin:1.75rem auto 0;
@@ -162,6 +157,8 @@
   select{font-family:'Inter';font-size:.85rem;}
   input:focus,select:focus{outline:2px solid var(--tesla);outline-offset:1px;}
   .field{margin-bottom:0;}
+  .check-row{display:flex;align-items:flex-start;gap:.5rem;font-size:.8rem;color:var(--muted);cursor:pointer;line-height:1.4;}
+  .check-row input{width:auto;margin-top:.15rem;flex-shrink:0;}
   .btn{
     appearance:none;
     border:none;
@@ -203,6 +200,22 @@
   .admin-section h4 .dot{width:8px;height:8px;border-radius:50%;background:var(--muted);}
   .settings-note{font-size:.78rem;color:var(--muted);margin-top:1rem;line-height:1.5;}
 
+  .qc-result{
+    display:flex; align-items:center; justify-content:center; gap:1.5rem;
+    margin-top:1.5rem; flex-wrap:wrap;
+  }
+  .qc-side{ text-align:center; }
+  .qc-side .side-label{ margin-bottom:.3rem; }
+  .qc-value{ font-size:1.6rem; font-weight:700; }
+  .qc-side:first-child .qc-value{ color:var(--tesla); }
+  .qc-side:last-child .qc-value{ color:var(--panda); }
+  .qc-vs{
+    font-family:'Bebas Neue',sans-serif; color:var(--muted);
+    font-size:.85rem; letter-spacing:.2em;
+  }
+  .qc-diff{ text-align:center; margin-top:1rem; font-size:.9rem; color:var(--muted); }
+  .qc-diff strong{ color:var(--paper); }
+
   .vehicle-card{
     border:1px solid var(--line);
     border-radius:12px;
@@ -215,6 +228,10 @@
   .source-badge{
     font-size:.65rem;letter-spacing:.08em;text-transform:uppercase;
     background:var(--tesla);color:#04201B;border-radius:999px;padding:.25rem .6rem;font-weight:700;font-family:'Inter';
+  }
+  .compare-badge{
+    font-size:.65rem;letter-spacing:.08em;text-transform:uppercase;
+    background:var(--panda);color:#2A1806;border-radius:999px;padding:.25rem .6rem;font-weight:700;font-family:'Inter';
   }
   .vehicle-card-actions{display:flex;gap:.5rem;align-items:center;}
   .radio-row{display:flex;align-items:center;gap:.4rem;font-size:.78rem;color:var(--muted);}
@@ -318,8 +335,9 @@
 <body>
 
 <div class="topnav">
-  <button id="navTracker" class="active">Tracker</button>
-  <button id="navAdmin">Admin</button>
+  <button id="navTracker" class="active" data-i18n="navTracker">Tracker</button>
+  <button id="navAdmin" data-i18n="navAdmin">Admin</button>
+  <button id="langToggle" style="font-weight:700;">PT</button>
 </div>
 
 <div id="trackerView">
@@ -328,21 +346,20 @@
   <div class="wrap">
     <div class="duel-row">
       <div class="duel-side src">
-        <div class="side-label" id="srcLabel">Logged</div>
+        <div class="side-label" id="srcLabel" data-i18n="lblLogged">Logged</div>
         <h1 class="side-title" id="srcTitle">Tesla Model 3</h1>
       </div>
       <div class="duel-vs">
         <span class="vs">VS</span>
-        <select id="compareSelect"></select>
       </div>
       <div class="duel-side cmp">
-        <div class="side-label" id="cmpLabel">Calculated</div>
+        <div class="side-label" id="cmpLabel" data-i18n="lblCalculated">Calculated</div>
         <h1 class="side-title" id="cmpTitle">Fiat Panda</h1>
       </div>
     </div>
 
     <div class="savings-tick">
-      <div class="st-label">Net saved by switching</div>
+      <div class="st-label" data-i18n="lblNetSaved">Net saved by switching</div>
       <div class="st-value mono pos" id="netSavingsValue">€0.00</div>
       <div class="st-note" id="netSavingsNote">Log your first entry to start the count</div>
     </div>
@@ -351,12 +368,37 @@
 
 <div class="wrap">
 
+  <section id="quick-calc" style="padding-bottom:2.5rem;">
+    <div class="eyebrow" data-i18n="eyebrowTryIt">Try it out</div>
+    <h2 class="sec-title" data-i18n="titleQuickCalc">Quick calculator</h2>
+    <div class="card">
+      <div class="grid">
+        <div class="field">
+          <label for="qc-km" data-i18n="lblKmDrivenPlanning">Km driven (or planning to do)</label>
+          <input type="number" id="qc-km" min="0" step="1" placeholder="e.g. 500" value="500">
+        </div>
+      </div>
+      <div class="qc-result">
+        <div class="qc-side">
+          <div class="side-label" id="qcSrcLabel">Tesla</div>
+          <div class="qc-value mono" id="qcSrcValue">€0.00</div>
+        </div>
+        <div class="qc-vs" data-i18n="lblVsLower">vs</div>
+        <div class="qc-side">
+          <div class="side-label" id="qcCmpLabel">Panda</div>
+          <div class="qc-value mono" id="qcCmpValue">€0.00</div>
+        </div>
+      </div>
+      <div class="qc-diff" id="qcDiff"></div>
+      <div class="settings-note" data-i18n="noteQuickCalc">Uses each vehicle's default rate from Admin — nothing here is saved, and it doesn't affect your logged entries.</div>
+    </div>
+  </section>
 
   <section id="comparison">
     <div class="sec-head">
       <div>
-        <div class="eyebrow">Comparison</div>
-        <h2 class="sec-title" style="margin-bottom:0;">The comparison</h2>
+        <div class="eyebrow" data-i18n="eyebrowComparison">Comparison</div>
+        <h2 class="sec-title" style="margin-bottom:0;" data-i18n="titleComparison">The comparison</h2>
       </div>
     </div>
 
@@ -372,24 +414,24 @@
         </div>
         <div class="bar-row">
           <div class="bar-track"><div class="bar-fill" id="srcMaintBar" style="width:0%"></div></div>
-          <div class="bar-label"><span>Maintenance</span><span id="srcMaintVal" class="mono">€0.00</span></div>
+          <div class="bar-label"><span data-i18n="lblMaintenance">Maintenance</span><span id="srcMaintVal" class="mono">€0.00</span></div>
         </div>
         <div class="bar-row">
           <div class="bar-track"><div class="bar-fill" id="srcInsBar" style="width:0%"></div></div>
-          <div class="bar-label"><span>Insurance</span><span id="srcInsVal" class="mono">€0.00</span></div>
+          <div class="bar-label"><span data-i18n="lblInsurance">Insurance</span><span id="srcInsVal" class="mono">€0.00</span></div>
         </div>
         <div class="bar-row">
           <div class="bar-track"><div class="bar-fill" id="srcTaxBar" style="width:0%"></div></div>
-          <div class="bar-label"><span>Road tax</span><span id="srcTaxVal" class="mono">€0.00</span></div>
+          <div class="bar-label"><span data-i18n="lblRoadTax">Road tax</span><span id="srcTaxVal" class="mono">€0.00</span></div>
         </div>
 
-        <div class="dc-row"><span>Cost per km</span><span class="mono" id="srcPerKm">€0.000</span></div>
-        <div class="dc-row"><span>Cost per month</span><span class="mono" id="srcPerMonth">€0.00</span></div>
+        <div class="dc-row"><span data-i18n="lblCostPerKm">Cost per km</span><span class="mono" id="srcPerKm">€0.000</span></div>
+        <div class="dc-row"><span data-i18n="lblCostPerMonth">Cost per month</span><span class="mono" id="srcPerMonth">€0.00</span></div>
       </div>
 
       <div class="duel-card cmp-c">
         <h3 id="cmpCardName">Panda</h3>
-        <div class="dc-sub">Same km, calculated rates</div>
+        <div class="dc-sub" data-i18n="subSameKm">Same km, calculated rates</div>
         <div class="dc-total mono" id="cmpTotal">€0.00</div>
 
         <div class="bar-row">
@@ -398,19 +440,19 @@
         </div>
         <div class="bar-row">
           <div class="bar-track"><div class="bar-fill" id="cmpMaintBar" style="width:0%"></div></div>
-          <div class="bar-label"><span>Maintenance</span><span id="cmpMaintVal" class="mono">€0.00</span></div>
+          <div class="bar-label"><span data-i18n="lblMaintenance">Maintenance</span><span id="cmpMaintVal" class="mono">€0.00</span></div>
         </div>
         <div class="bar-row">
           <div class="bar-track"><div class="bar-fill" id="cmpInsBar" style="width:0%"></div></div>
-          <div class="bar-label"><span>Insurance</span><span id="cmpInsVal" class="mono">€0.00</span></div>
+          <div class="bar-label"><span data-i18n="lblInsurance">Insurance</span><span id="cmpInsVal" class="mono">€0.00</span></div>
         </div>
         <div class="bar-row">
           <div class="bar-track"><div class="bar-fill" id="cmpTaxBar" style="width:0%"></div></div>
-          <div class="bar-label"><span>Road tax</span><span id="cmpTaxVal" class="mono">€0.00</span></div>
+          <div class="bar-label"><span data-i18n="lblRoadTax">Road tax</span><span id="cmpTaxVal" class="mono">€0.00</span></div>
         </div>
 
-        <div class="dc-row"><span>Cost per km</span><span class="mono" id="cmpPerKm">€0.000</span></div>
-        <div class="dc-row"><span>Cost per month</span><span class="mono" id="cmpPerMonth">€0.00</span></div>
+        <div class="dc-row"><span data-i18n="lblCostPerKm">Cost per km</span><span class="mono" id="cmpPerKm">€0.000</span></div>
+        <div class="dc-row"><span data-i18n="lblCostPerMonth">Cost per month</span><span class="mono" id="cmpPerMonth">€0.00</span></div>
       </div>
     </div>
 
@@ -418,9 +460,9 @@
       <div class="chart-head">
         <h4 id="chartTitle" style="margin-bottom:0;">Cumulative savings over time</h4>
         <div class="chart-toggle">
-          <button type="button" class="chart-type-btn active" data-type="line">Line</button>
-          <button type="button" class="chart-type-btn" data-type="bar">Bars</button>
-          <button type="button" class="chart-type-btn" data-type="pie">Pie</button>
+          <button type="button" class="chart-type-btn active" data-type="line" data-i18n="chartLine">Line</button>
+          <button type="button" class="chart-type-btn" data-type="bar" data-i18n="chartBars">Bars</button>
+          <button type="button" class="chart-type-btn" data-type="pie" data-i18n="chartPie">Pie</button>
         </div>
       </div>
       <div class="chart-legend" id="chartLegend"></div>
@@ -428,17 +470,41 @@
     </div>
   </section>
 
+  <section id="all-vehicles">
+    <div class="eyebrow" data-i18n="eyebrowAllVehicles">Ranking</div>
+    <h2 class="sec-title" data-i18n="titleAllVehicles">All vehicles</h2>
+    <div class="card">
+      <div class="table-scroll">
+        <table id="allVehiclesTable">
+          <thead>
+            <tr>
+              <th data-i18n="thVehicle">Vehicle</th>
+              <th data-i18n="thTotal">Total</th>
+              <th data-i18n="thEnergyFuel">Energy/Fuel</th>
+              <th data-i18n="lblMaintenance">Maintenance</th>
+              <th data-i18n="lblInsurance">Insurance</th>
+              <th data-i18n="lblRoadTax">Road tax</th>
+              <th data-i18n="thPerKm">€/km</th>
+              <th data-i18n="thPerMonth">€/month</th>
+            </tr>
+          </thead>
+          <tbody id="allVehiclesBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
   <section id="investment">
-    <div class="eyebrow">Investment</div>
-    <h2 class="sec-title">Break-even</h2>
+    <div class="eyebrow" data-i18n="eyebrowInvestment">Investment</div>
+    <h2 class="sec-title" data-i18n="titleBreakeven">Break-even</h2>
     <div class="card">
       <div class="grid">
         <div class="field">
-          <label style="margin-bottom:.2rem;">Extra spent switching</label>
+          <label style="margin-bottom:.2rem;" data-i18n="lblExtraSpent">Extra spent switching</label>
           <div class="dc-total mono" id="investPremium" style="font-size:1.6rem;margin-bottom:0;">€0.00</div>
         </div>
         <div class="field">
-          <label style="margin-bottom:.2rem;">Running-cost savings so far</label>
+          <label style="margin-bottom:.2rem;" data-i18n="lblSavingsSoFar">Running-cost savings so far</label>
           <div class="dc-total mono" id="investSavings" style="font-size:1.6rem;margin-bottom:0;">€0.00</div>
         </div>
       </div>
@@ -446,37 +512,37 @@
         <div class="bar-track"><div class="bar-fill" id="investBar" style="width:0%;background:var(--tesla);"></div></div>
         <div class="bar-label"><span id="investPct">0% of the way there</span><span id="investRemaining"></span></div>
       </div>
-      <div class="dc-row"><span>Of which infrastructure</span><span class="mono" id="investInfra">€0.00</span></div>
-      <div class="dc-row"><span>Projected break-even</span><span class="mono" id="investEta">Set purchase price &amp; resale value in Admin</span></div>
+      <div class="dc-row"><span data-i18n="lblOfWhichInfra">Of which infrastructure</span><span class="mono" id="investInfra">€0.00</span></div>
+      <div class="dc-row"><span data-i18n="lblProjectedBreakeven">Projected break-even</span><span class="mono" id="investEta">Set purchase price &amp; resale value in Admin</span></div>
     </div>
   </section>
 
   <section id="co2">
-    <div class="eyebrow">Environment</div>
-    <h2 class="sec-title">CO2 avoided</h2>
+    <div class="eyebrow" data-i18n="eyebrowEnvironment">Environment</div>
+    <h2 class="sec-title" data-i18n="titleCo2">CO2 avoided</h2>
     <div class="card">
       <div class="dc-total mono" id="co2Total" style="color:var(--tesla);">0 kg CO2</div>
       <div class="dc-row"><span id="co2CmpLabel">Comparison vehicle would have emitted</span><span class="mono" id="co2Cmp">0 kg</span></div>
       <div class="dc-row"><span id="co2SrcLabel">Source vehicle emitted</span><span class="mono" id="co2Src">0 kg</span></div>
-      <div class="dc-row"><span>Per km avoided</span><span class="mono" id="co2PerKm">0 g/km</span></div>
+      <div class="dc-row"><span data-i18n="lblPerKmAvoided">Per km avoided</span><span class="mono" id="co2PerKm">0 g/km</span></div>
     </div>
   </section>
 
-  <section id="history">
-    <div class="eyebrow">Log</div>
-    <h2 class="sec-title">Entry history</h2>
+  <section id="history-public">
+    <div class="eyebrow" data-i18n="eyebrowLog">Log</div>
+    <h2 class="sec-title" data-i18n="titleEntryHistory">Entry history</h2>
     <div class="card">
       <div class="table-scroll">
-        <table id="historyTable">
+        <table id="historyTablePublic">
           <thead>
             <tr>
-              <th>Date</th><th>Odometer</th><th>km</th><th id="histSrcHeader">Tesla €</th><th id="histCmpHeader">Panda €</th><th>Notes</th><th></th>
+              <th data-i18n="thDate">Date</th><th data-i18n="thOdometer">Odometer</th><th>km</th><th id="histSrcHeaderPublic">Tesla €</th><th id="histCmpHeaderPublic">Panda €</th><th data-i18n="thNotes">Notes</th>
             </tr>
           </thead>
-          <tbody id="historyBody"></tbody>
+          <tbody id="historyBodyPublic"></tbody>
         </table>
       </div>
-      <div class="empty-state" id="emptyState">No entries yet — log your first odometer reading above.</div>
+      <div class="empty-state" id="emptyStatePublic" data-i18n="msgNoEntriesShort">No entries yet.</div>
     </div>
   </section>
 
@@ -487,123 +553,151 @@
   <div class="wrap" style="padding-top:6rem;">
 
     <div id="adminLocked" class="admin-lock">
-      <h3>Admin</h3>
-      <p>Enter the admin password to edit vehicles and settings.</p>
+      <h3 data-i18n="titleAdmin">Admin</h3>
+      <p data-i18n="msgEnterPassword">Enter the admin password to edit vehicles and settings.</p>
       <div class="field" style="margin-bottom:1rem;">
-        <input type="password" id="pwInput" placeholder="Password">
+        <input type="password" id="pwInput" placeholder="Password" data-i18n-ph="phPassword">
       </div>
-      <button class="btn" id="pwSubmit">Unlock</button>
+      <button class="btn" id="pwSubmit" data-i18n="btnUnlock">Unlock</button>
       <p class="status-msg" id="pwStatus" style="margin-top:.8rem;"></p>
     </div>
 
     <div id="adminUnlocked" style="display:none;">
-      <div class="eyebrow">Admin</div>
-      <h2 class="sec-title">Vehicles &amp; settings</h2>
+      <div class="eyebrow" data-i18n="eyebrowAdmin">Admin</div>
+      <h2 class="sec-title" data-i18n="titleVehiclesSettings">Vehicles &amp; settings</h2>
       <section id="log-entry" style="padding-top:0;border-bottom:none;">
-    <div class="eyebrow">Log</div>
-    <h2 class="sec-title">Log an odometer reading</h2>
+    <div class="eyebrow" data-i18n="eyebrowLog">Log</div>
+    <h2 class="sec-title" data-i18n="titleLogOdometer">Log an odometer reading</h2>
     <div class="card">
       <form id="entryForm">
         <div class="grid">
           <div class="field">
-            <label for="f-date">Date</label>
+            <label for="f-date" data-i18n="thDate">Date</label>
             <input type="date" id="f-date" required>
           </div>
           <div class="field">
-            <label for="f-odo">Odometer (km)</label>
-            <input type="number" id="f-odo" min="0" step="1" required placeholder="e.g. 14250">
+            <label for="f-odo" data-i18n="lblOdometerKm">Odometer (km)</label>
+            <input type="number" id="f-odo" min="0" step="1" required placeholder="e.g. 14250" data-i18n-ph="phOdoExample">
           </div>
           <div class="field">
-            <label for="f-kwh">kWh charged — optional</label>
-            <input type="number" id="f-kwh" min="0" step="0.01" placeholder="blank = use default rate">
+            <label for="f-kwh" data-i18n="lblKwhOptional">kWh charged — optional</label>
+            <input type="number" id="f-kwh" min="0" step="0.01" placeholder="blank = use default rate" data-i18n-ph="phBlankDefaultRate">
           </div>
           <div class="field">
-            <label for="f-fuelprice">Gasoline price €/L — optional</label>
-            <input type="number" id="f-fuelprice" min="0" step="0.01" placeholder="blank = use default price">
+            <label for="f-fuelprice" data-i18n="lblGasolinePriceOptional">Gasoline price €/L — optional</label>
+            <input type="number" id="f-fuelprice" min="0" step="0.01" placeholder="blank = use default price" data-i18n-ph="phBlankDefaultPrice">
           </div>
           <div class="field" style="grid-column:span 2;">
-            <label for="f-notes">Notes — optional</label>
-            <input type="text" id="f-notes" placeholder="e.g. after weekend trip">
+            <label for="f-notes" data-i18n="lblNotesOptional">Notes — optional</label>
+            <input type="text" id="f-notes" placeholder="e.g. after weekend trip" data-i18n-ph="phNotesExample">
+          </div>
+          <div class="field" style="grid-column:span 2;">
+            <label class="check-row" for="f-free-energy" style="margin-top:.2rem;">
+              <input type="checkbox" id="f-free-energy" style="width:auto;">
+              <span data-i18n="lblFreeEnergy">Free charging for this stretch (e.g. free Supercharger km) — excludes energy cost for the source vehicle, but the comparison vehicle's fuel cost still counts as normal</span>
+            </label>
           </div>
         </div>
         <div class="form-actions">
-          <button type="submit" class="btn">Add entry</button>
+          <button type="submit" class="btn" data-i18n="btnAddEntry">Add entry</button>
           <span class="status-msg" id="formStatus">Logging km for <strong id="formSourceName">Tesla</strong> — every other vehicle is calculated automatically.</span>
         </div>
       </form>
     </div>
       </section>
 
+      <section id="history" style="padding-top:0;">
+        <div class="eyebrow" data-i18n="eyebrowLog">Log</div>
+        <h2 class="sec-title" data-i18n="titleEntryHistory">Entry history</h2>
+        <div class="card">
+          <div class="table-scroll">
+            <table id="historyTable">
+              <thead>
+                <tr>
+                  <th data-i18n="thDate">Date</th><th data-i18n="thOdometer">Odometer</th><th>km</th><th id="histSrcHeader">Tesla €</th><th id="histCmpHeader">Panda €</th><th data-i18n="thNotes">Notes</th><th></th>
+                </tr>
+              </thead>
+              <tbody id="historyBody"></tbody>
+            </table>
+          </div>
+          <div class="empty-state" id="emptyState" data-i18n="msgNoEntriesLong">No entries yet — log your first odometer reading above.</div>
+        </div>
+      </section>
+
 
       <div class="card">
         <div class="admin-section">
-          <h4><span class="dot"></span>Baseline</h4>
+          <h4><span class="dot"></span><span data-i18n="h4Baseline">Baseline</span></h4>
           <div class="grid">
             <div class="field">
-              <label for="s-startodo">Starting odometer (km) — for the source vehicle</label>
+              <label for="s-startodo" data-i18n="lblStartOdometer">Starting odometer (km) — for the source vehicle</label>
               <input type="number" id="s-startodo" min="0" step="1" value="0">
+            </div>
+            <div class="field">
+              <label for="compareSelect" data-i18n="lblCompareAgainst">Compare source against</label>
+              <select id="compareSelect"></select>
             </div>
           </div>
         </div>
 
         <div class="admin-section">
-          <h4><span class="dot"></span>Vehicles</h4>
+          <h4><span class="dot"></span><span data-i18n="h4Vehicles">Vehicles</span></h4>
           <div id="vehicleList"></div>
-          <button type="button" class="btn ghost small" id="addVehicleBtn">+ Add vehicle</button>
-          <div class="settings-note">Exactly one vehicle is the <strong>source</strong> — the one you actually log odometer readings for. Every other vehicle is a hypothetical, calculated using its own rates against the source's km.</div>
+          <button type="button" class="btn ghost small" id="addVehicleBtn" data-i18n="btnAddVehicle">+ Add vehicle</button>
+          <div class="settings-note" data-i18n="noteSourceVehicle">Exactly one vehicle is the <strong>source</strong> — the one you actually log odometer readings for. Every other vehicle is a hypothetical, calculated using its own rates against the source's km.</div>
         </div>
 
         <div class="admin-section">
-          <h4><span class="dot"></span>Infrastructure (one-off costs)</h4>
+          <h4><span class="dot"></span><span data-i18n="h4Infra">Infrastructure (one-off costs)</span></h4>
           <div class="grid">
-            <div class="field"><label for="s-infra-solar">Solar panels (€)</label><input type="number" id="s-infra-solar" min="0" step="1" value="0"></div>
-            <div class="field"><label for="s-infra-batteries">Batteries (€)</label><input type="number" id="s-infra-batteries" min="0" step="1" value="0"></div>
-            <div class="field"><label for="s-infra-inverter">Inverter (€)</label><input type="number" id="s-infra-inverter" min="0" step="1" value="0"></div>
-            <div class="field"><label for="s-infra-socket">Car socket (€)</label><input type="number" id="s-infra-socket" min="0" step="1" value="0"></div>
-            <div class="field"><label for="s-infra-wallbox">Wall box (€)</label><input type="number" id="s-infra-wallbox" min="0" step="1" value="0"></div>
-            <div class="field"><label for="s-infra-misc">Miscellaneous (€)</label><input type="number" id="s-infra-misc" min="0" step="1" value="0"></div>
+            <div class="field"><label for="s-infra-solar" data-i18n="lblSolar">Solar panels (€)</label><input type="number" id="s-infra-solar" min="0" step="1" value="0"></div>
+            <div class="field"><label for="s-infra-batteries" data-i18n="lblBatteries">Batteries (€)</label><input type="number" id="s-infra-batteries" min="0" step="1" value="0"></div>
+            <div class="field"><label for="s-infra-inverter" data-i18n="lblInverter">Inverter (€)</label><input type="number" id="s-infra-inverter" min="0" step="1" value="0"></div>
+            <div class="field"><label for="s-infra-socket" data-i18n="lblSocket">Car socket (€)</label><input type="number" id="s-infra-socket" min="0" step="1" value="0"></div>
+            <div class="field"><label for="s-infra-wallbox" data-i18n="lblWallbox">Wall box (€)</label><input type="number" id="s-infra-wallbox" min="0" step="1" value="0"></div>
+            <div class="field"><label for="s-infra-misc" data-i18n="lblMisc">Miscellaneous (€)</label><input type="number" id="s-infra-misc" min="0" step="1" value="0"></div>
           </div>
-          <div class="settings-note">Total: <strong id="infraTotalPreview" class="mono">€0.00</strong> — added to the break-even calculation as part of what you spent switching.</div>
+          <div class="settings-note"><span data-i18n="noteInfraTotalPre">Total:</span> <strong id="infraTotalPreview" class="mono">€0.00</strong> <span data-i18n="noteInfraTotalPost">— added to the break-even calculation as part of what you spent switching.</span></div>
         </div>
 
         <div class="form-actions">
-          <button type="button" class="btn" id="saveSettingsBtn">Save all vehicles &amp; rates</button>
+          <button type="button" class="btn" id="saveSettingsBtn" data-i18n="btnSaveAll">Save all vehicles &amp; rates</button>
           <span class="status-msg" id="settingsStatus"></span>
         </div>
       </div>
 
       <div class="card" style="margin-top:1.25rem;">
         <div class="admin-section" style="margin-bottom:0;">
-          <h4><span class="dot"></span>Google Sheets sync</h4>
+          <h4><span class="dot"></span><span data-i18n="h4SheetsSync">Google Sheets sync</span></h4>
           <div class="status-msg" id="syncStatus">Connecting…</div>
         </div>
       </div>
 
       <div class="card" style="margin-top:1.25rem;">
         <div class="admin-section" style="margin-bottom:0;">
-          <h4><span class="dot" style="background:var(--loss);"></span>Change admin password</h4>
+          <h4><span class="dot" style="background:var(--loss);"></span><span data-i18n="h4ChangePassword">Change admin password</span></h4>
           <div class="grid">
             <div class="field">
-              <label for="s-newpw">New password</label>
-              <input type="password" id="s-newpw" placeholder="New password">
+              <label for="s-newpw" data-i18n="lblNewPassword">New password</label>
+              <input type="password" id="s-newpw" placeholder="New password" data-i18n-ph="phNewPassword">
             </div>
           </div>
           <div class="form-actions">
-            <button type="button" class="btn ghost" id="changePwBtn">Update password</button>
+            <button type="button" class="btn ghost" id="changePwBtn" data-i18n="btnUpdatePassword">Update password</button>
             <span class="status-msg" id="pwChangeStatus"></span>
           </div>
         </div>
       </div>
 
       <div class="form-actions" style="margin-top:1.5rem;">
-        <button type="button" class="btn ghost" id="lockAdminBtn">Lock admin</button>
+        <button type="button" class="btn ghost" id="lockAdminBtn" data-i18n="btnLockAdmin">Lock admin</button>
       </div>
     </div>
 
   </div>
 </div>
 
-<footer>Local-first · your data lives in this browser unless you connect a Google Sheet in Admin.</footer>
+<footer data-i18n="footerText">Local-first · your data lives in this browser unless you connect a Google Sheet in Admin.</footer>
 
 <script>
 (function(){
@@ -613,7 +707,179 @@
   const LS_PASSWORD = 'tp_admin_pw';
   const SS_AUTH = 'tp_admin_auth';
   const DEFAULT_PASSWORD = 'panda2008';
-  const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyyWpaQ7rvtQD54L0eYOmmNG6VrlSRf8rNBeaZ9pFDCHFoSzjKnmEMIq9YYMPW_yyDI/exec';
+  const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyFqmdCGeg7taz7YYPb5kWweXJAzMEBSaM_99lhDg0lkIIf66Tee1Y2d_Jgmij4VNPO/exec';
+
+  /* ---------- I18N ---------- */
+  const LS_LANG = 'tp_lang';
+  const TRANSLATIONS = {
+    en: {
+      navTracker:'Tracker', navAdmin:'Admin',
+      lblLogged:'Logged', lblCalculated:'Calculated', lblNetSaved:'Net saved by switching',
+      eyebrowTryIt:'Try it out', titleQuickCalc:'Quick calculator', lblKmDrivenPlanning:'Km driven (or planning to do)',
+      lblVsLower:'vs', noteQuickCalc:"Uses each vehicle's default rate from Admin — nothing here is saved, and it doesn't affect your logged entries.",
+      eyebrowComparison:'Comparison', titleComparison:'The comparison',
+      lblMaintenance:'Maintenance', lblInsurance:'Insurance', lblRoadTax:'Road tax',
+      lblCostPerKm:'Cost per km', lblCostPerMonth:'Cost per month', subSameKm:'Same km, calculated rates',
+      chartLine:'Line', chartBars:'Bars', chartPie:'Pie',
+      eyebrowAllVehicles:'Ranking', titleAllVehicles:'All vehicles',
+      thVehicle:'Vehicle', thTotal:'Total', thEnergyFuel:'Energy/Fuel', thPerKm:'€/km', thPerMonth:'€/month',
+      vcSourceBadge:'Source', badgeComparing:'Comparing',
+      eyebrowInvestment:'Investment', titleBreakeven:'Break-even',
+      lblExtraSpent:'Extra spent switching', lblSavingsSoFar:'Running-cost savings so far',
+      lblOfWhichInfra:'Of which infrastructure', lblProjectedBreakeven:'Projected break-even',
+      eyebrowEnvironment:'Environment', titleCo2:'CO2 avoided', lblPerKmAvoided:'Per km avoided',
+      eyebrowLog:'Log', titleEntryHistory:'Entry history',
+      thDate:'Date', thOdometer:'Odometer', thNotes:'Notes',
+      msgNoEntriesShort:'No entries yet.', msgNoEntriesLong:'No entries yet — log your first odometer reading above.',
+      titleAdmin:'Admin', msgEnterPassword:'Enter the admin password to edit vehicles and settings.',
+      phPassword:'Password', btnUnlock:'Unlock',
+      eyebrowAdmin:'Admin', titleVehiclesSettings:'Vehicles & settings',
+      titleLogOdometer:'Log an odometer reading',
+      lblOdometerKm:'Odometer (km)', phOdoExample:'e.g. 14250',
+      lblKwhOptional:'kWh charged — optional', phBlankDefaultRate:'blank = use default rate',
+      lblGasolinePriceOptional:'Gasoline price €/L — optional', phBlankDefaultPrice:'blank = use default price',
+      lblNotesOptional:'Notes — optional', phNotesExample:'e.g. after weekend trip',
+      lblFreeEnergy:"Free charging for this stretch (e.g. free Supercharger km) — excludes energy cost for the source vehicle, but the comparison vehicle's fuel cost still counts as normal",
+      btnAddEntry:'Add entry',
+      h4Baseline:'Baseline', lblStartOdometer:'Starting odometer (km) — for the source vehicle',
+      lblCompareAgainst:'Compare source against',
+      h4Vehicles:'Vehicles', btnAddVehicle:'+ Add vehicle',
+      noteSourceVehicle:"Exactly one vehicle is the <strong>source</strong> — the one you actually log odometer readings for. Every other vehicle is a hypothetical, calculated using its own rates against the source's km.",
+      h4Infra:'Infrastructure (one-off costs)',
+      lblSolar:'Solar panels (€)', lblBatteries:'Batteries (€)', lblInverter:'Inverter (€)',
+      lblSocket:'Car socket (€)', lblWallbox:'Wall box (€)', lblMisc:'Miscellaneous (€)',
+      noteInfraTotalPre:'Total:', noteInfraTotalPost:'— added to the break-even calculation as part of what you spent switching.',
+      btnSaveAll:'Save all vehicles & rates',
+      h4SheetsSync:'Google Sheets sync',
+      h4ChangePassword:'Change admin password', lblNewPassword:'New password', phNewPassword:'New password',
+      btnUpdatePassword:'Update password', btnLockAdmin:'Lock admin',
+      footerText:'Local-first · your data lives in this browser unless you connect a Google Sheet in Admin.',
+      // dynamic
+      wordEntry:'entry', wordEntries:'entries',
+      msgLogFirstEntry:'Log your first entry to start the count',
+      msgOverKmEntries:'Over {km} km · {count} {word} logged',
+      kmDrivenLabel:'{km} km driven',
+      lblEnergy:'Energy', lblFuel:'Fuel',
+      chartTitleLine:'Cumulative savings over time', chartTitleBar:'Cost breakdown — bars', chartTitlePie:'Cost breakdown — share of total',
+      investPctWay:'{pct}% of the way there',
+      msgNotSavingYet:'Not saving yet', msgLeft:'{amount} left',
+      msgNeedDipBelow:"Running costs need to dip below the comparison vehicle's before a break-even date can be projected",
+      msgGapWontClose:"At the current rate, this gap won't close — check your rates in Admin",
+      msgAlreadyBrokeEven:'Already broke even 🎉',
+      msgAlreadyBrokeEvenResale:"Already broke even — {compare}'s resale covers the {source} premium",
+      msgKmAway:'~{km} km away', msgSetPurchasePrice:'Set purchase price & resale value in Admin',
+      co2WouldHaveEmitted:'{name} would have emitted', co2Emitted:'{name} emitted',
+      co2Avoided:'{amount} kg CO2 avoided', co2MoreHigher:'{amount} kg CO2 more ({name} higher)',
+      formStatusLogging:'Logging km for {name} — every other vehicle is calculated automatically.',
+      formStatusAdded:'Entry added ✓', formStatusSyncFail:'Saved locally — sheet sync failed',
+      syncConnecting:'Connecting…', syncConnected:'Connected to Google Sheets ✓',
+      syncFail:'Could not reach the sheet — check the URL/deployment', syncNotConnected:'Not connected — using local storage only',
+      settingsSaving:'Saving…', settingsSavedSynced:'Saved ✓ (synced to Sheet)', settingsSavedFail:'Saved locally — Sheet sync failed',
+      pwWrong:'Wrong password — try again.', pwEnterNew:'Enter a new password first.', pwUpdated:'Password updated ✓',
+      qcWouldSave:'{name} would save {amount} over those {km} km',
+      qcWouldCost:'{name} would cost {amount} more over those {km} km',
+      btnRemove:'remove',
+      vcFuelType:'Fuel type', vcFuelElectric:'Electric (kWh)', vcFuelLiquid:'Petrol/Diesel (L)',
+      vcConsumptionElectric:'Consumption (kWh/100km)', vcConsumptionLiquid:'Consumption (L/100km)',
+      vcPriceElectric:'Price (€/kWh)', vcPriceLiquid:'Price (€/L)',
+      vcInsurance:'Insurance (€/year)', vcMaintenance:'Maintenance (€/year)', vcRoadTax:'Road tax (€/year)',
+      vcPurchase:'Purchase price (€)', vcResale:'Resale value today (€)',
+      vcCo2Electric:'Grid emissions (kg CO2/kWh)', vcCo2Liquid:'Emissions (kg CO2/L)',
+      vcSetSource:'Set as source', vcRemove:'Remove', vcName:'Name', vcUnnamed:'Unnamed vehicle', vcNewVehicle:'New vehicle',
+      alertKeepTwo:'Keep at least two vehicles — one source and one to compare against.',
+      entryFoundToUpload:'', // unused placeholder
+    },
+    pt: {
+      navTracker:'Painel', navAdmin:'Admin',
+      lblLogged:'Registado', lblCalculated:'Calculado', lblNetSaved:'Poupança líquida ao mudar',
+      eyebrowTryIt:'Experimenta', titleQuickCalc:'Calculadora rápida', lblKmDrivenPlanning:'Km percorridos (ou a planear)',
+      lblVsLower:'vs', noteQuickCalc:'Usa a taxa predefinida de cada veículo no Admin — nada aqui é guardado nem afeta as tuas entradas registadas.',
+      eyebrowComparison:'Comparação', titleComparison:'A comparação',
+      lblMaintenance:'Manutenção', lblInsurance:'Seguro', lblRoadTax:'Imposto de circulação',
+      lblCostPerKm:'Custo por km', lblCostPerMonth:'Custo por mês', subSameKm:'Mesmos km, taxas calculadas',
+      chartLine:'Linha', chartBars:'Barras', chartPie:'Circular',
+      eyebrowAllVehicles:'Classificação', titleAllVehicles:'Todos os veículos',
+      thVehicle:'Veículo', thTotal:'Total', thEnergyFuel:'Energia/Combustível', thPerKm:'€/km', thPerMonth:'€/mês',
+      vcSourceBadge:'Origem', badgeComparing:'Em comparação',
+      eyebrowInvestment:'Investimento', titleBreakeven:'Ponto de equilíbrio',
+      lblExtraSpent:'Extra gasto ao mudar', lblSavingsSoFar:'Poupança em custos até agora',
+      lblOfWhichInfra:'Da qual infraestrutura', lblProjectedBreakeven:'Ponto de equilíbrio projetado',
+      eyebrowEnvironment:'Ambiente', titleCo2:'CO2 evitado', lblPerKmAvoided:'Por km evitado',
+      eyebrowLog:'Registo', titleEntryHistory:'Histórico de entradas',
+      thDate:'Data', thOdometer:'Conta-km', thNotes:'Notas',
+      msgNoEntriesShort:'Ainda sem entradas.', msgNoEntriesLong:'Ainda sem entradas — regista a primeira leitura acima.',
+      titleAdmin:'Admin', msgEnterPassword:'Introduz a palavra-passe de admin para editar veículos e definições.',
+      phPassword:'Palavra-passe', btnUnlock:'Desbloquear',
+      eyebrowAdmin:'Admin', titleVehiclesSettings:'Veículos e definições',
+      titleLogOdometer:'Registar leitura do conta-quilómetros',
+      lblOdometerKm:'Conta-quilómetros (km)', phOdoExample:'ex. 14250',
+      lblKwhOptional:'kWh carregados — opcional', phBlankDefaultRate:'em branco = usa taxa predefinida',
+      lblGasolinePriceOptional:'Preço da gasolina €/L — opcional', phBlankDefaultPrice:'em branco = usa preço predefinido',
+      lblNotesOptional:'Notas — opcional', phNotesExample:'ex. depois de viagem de fim de semana',
+      lblFreeEnergy:'Carregamento gratuito neste trajeto (ex. km grátis de Supercharger) — exclui o custo de energia do veículo de origem, mas o custo de combustível do veículo de comparação conta normalmente',
+      btnAddEntry:'Adicionar entrada',
+      h4Baseline:'Base', lblStartOdometer:'Conta-quilómetros inicial (km) — do veículo de origem',
+      lblCompareAgainst:'Comparar origem com',
+      h4Vehicles:'Veículos', btnAddVehicle:'+ Adicionar veículo',
+      noteSourceVehicle:'Exatamente um veículo é a <strong>origem</strong> — aquele para o qual registas leituras reais. Todos os outros são hipotéticos, calculados com as suas próprias taxas com base nos km da origem.',
+      h4Infra:'Infraestrutura (custos únicos)',
+      lblSolar:'Painéis solares (€)', lblBatteries:'Baterias (€)', lblInverter:'Inversor (€)',
+      lblSocket:'Tomada para carro (€)', lblWallbox:'Wallbox (€)', lblMisc:'Outros (€)',
+      noteInfraTotalPre:'Total:', noteInfraTotalPost:'— adicionado ao cálculo do ponto de equilíbrio como parte do que gastaste ao mudar.',
+      btnSaveAll:'Guardar veículos e taxas',
+      h4SheetsSync:'Sincronização com Google Sheets',
+      h4ChangePassword:'Alterar palavra-passe de admin', lblNewPassword:'Nova palavra-passe', phNewPassword:'Nova palavra-passe',
+      btnUpdatePassword:'Atualizar palavra-passe', btnLockAdmin:'Bloquear admin',
+      footerText:'Local por defeito · os teus dados ficam neste navegador, a menos que ligues uma Google Sheet no Admin.',
+      // dynamic
+      wordEntry:'entrada', wordEntries:'entradas',
+      msgLogFirstEntry:'Regista a tua primeira entrada para começar a contagem',
+      msgOverKmEntries:'Mais de {km} km · {count} {word} registada(s)',
+      kmDrivenLabel:'{km} km percorridos',
+      lblEnergy:'Energia', lblFuel:'Combustível',
+      chartTitleLine:'Poupança acumulada ao longo do tempo', chartTitleBar:'Repartição de custos — barras', chartTitlePie:'Repartição de custos — percentagem do total',
+      investPctWay:'{pct}% do caminho percorrido',
+      msgNotSavingYet:'Ainda sem poupança', msgLeft:'faltam {amount}',
+      msgNeedDipBelow:'Os custos de utilização precisam de ficar abaixo dos do veículo de comparação para se poder projetar uma data de equilíbrio',
+      msgGapWontClose:'À taxa atual, esta diferença não vai fechar — verifica as taxas no Admin',
+      msgAlreadyBrokeEven:'Já atingiste o ponto de equilíbrio 🎉',
+      msgAlreadyBrokeEvenResale:'Já atingiste o ponto de equilíbrio — o valor de revenda do {compare} cobre o extra do {source}',
+      msgKmAway:'~{km} km de distância', msgSetPurchasePrice:'Define o preço de compra e valor de revenda no Admin',
+      co2WouldHaveEmitted:'{name} teria emitido', co2Emitted:'{name} emitiu',
+      co2Avoided:'{amount} kg CO2 evitados', co2MoreHigher:'{amount} kg CO2 a mais ({name} mais alto)',
+      formStatusLogging:'A registar km para {name} — todos os outros veículos são calculados automaticamente.',
+      formStatusAdded:'Entrada adicionada ✓', formStatusSyncFail:'Guardado localmente — falha ao sincronizar com a folha',
+      syncConnecting:'A ligar…', syncConnected:'Ligado ao Google Sheets ✓',
+      syncFail:'Não foi possível aceder à folha — verifica o URL/implementação', syncNotConnected:'Não ligado — a usar apenas armazenamento local',
+      settingsSaving:'A guardar…', settingsSavedSynced:'Guardado ✓ (sincronizado com a folha)', settingsSavedFail:'Guardado localmente — falha ao sincronizar',
+      pwWrong:'Palavra-passe errada — tenta novamente.', pwEnterNew:'Introduz primeiro uma nova palavra-passe.', pwUpdated:'Palavra-passe atualizada ✓',
+      qcWouldSave:'{name} pouparia {amount} nesses {km} km',
+      qcWouldCost:'{name} custaria mais {amount} nesses {km} km',
+      btnRemove:'remover',
+      vcFuelType:'Tipo de combustível', vcFuelElectric:'Elétrico (kWh)', vcFuelLiquid:'Gasolina/Gasóleo (L)',
+      vcConsumptionElectric:'Consumo (kWh/100km)', vcConsumptionLiquid:'Consumo (L/100km)',
+      vcPriceElectric:'Preço (€/kWh)', vcPriceLiquid:'Preço (€/L)',
+      vcInsurance:'Seguro (€/ano)', vcMaintenance:'Manutenção (€/ano)', vcRoadTax:'Imposto de circulação (€/ano)',
+      vcPurchase:'Preço de compra (€)', vcResale:'Valor de revenda atual (€)',
+      vcCo2Electric:'Emissões da rede (kg CO2/kWh)', vcCo2Liquid:'Emissões (kg CO2/L)',
+      vcSetSource:'Definir como origem', vcRemove:'Remover', vcName:'Nome', vcUnnamed:'Veículo sem nome', vcNewVehicle:'Novo veículo',
+      alertKeepTwo:'Mantém pelo menos dois veículos — um de origem e outro para comparar.',
+    }
+  };
+  let currentLang = localStorage.getItem(LS_LANG) || 'en';
+  function t(key){ return (TRANSLATIONS[currentLang] && TRANSLATIONS[currentLang][key]) || TRANSLATIONS.en[key] || key; }
+  function tf(key, vars){
+    let s = t(key);
+    Object.keys(vars||{}).forEach(k=>{ s = s.replace('{'+k+'}', vars[k]); });
+    return s;
+  }
+  function applyI18n(){
+    document.querySelectorAll('[data-i18n]').forEach(el=>{ el.textContent = t(el.dataset.i18n); });
+    document.querySelectorAll('[data-i18n-ph]').forEach(el=>{ el.placeholder = t(el.dataset.i18nPh); });
+    document.documentElement.lang = currentLang;
+    const lt = document.getElementById('langToggle');
+    if(lt) lt.textContent = currentLang==='en' ? 'PT' : 'EN';
+  }
 
   function seedVehicles(){
     return [
@@ -675,6 +941,7 @@
   settings.scriptUrl = SCRIPT_URL; // hardcoded — ignore anything stored
   let entries = loadEntries();
   let draftVehicles = JSON.parse(JSON.stringify(settings.vehicles));
+  let sheetConnected = false;
 
   function readInfraFields(){
     const num = id => parseFloat(document.getElementById(id).value)||0;
@@ -736,7 +1003,7 @@
       adminLocked.style.display='none'; adminUnlocked.style.display='block';
       populateAdminFields();
     } else {
-      document.getElementById('pwStatus').textContent = 'Wrong password — try again.';
+      document.getElementById('pwStatus').textContent = t('pwWrong');
     }
   }
   document.getElementById('lockAdminBtn').addEventListener('click', ()=>{
@@ -753,29 +1020,28 @@
       card.className='vehicle-card';
       card.innerHTML = `
         <div class="vehicle-card-head">
-          <div class="vname">${v.name||'Unnamed vehicle'} ${v.isSource?'<span class="source-badge">Source</span>':''}</div>
+          <div class="vname">${v.name||t('vcUnnamed')} ${v.isSource?'<span class="source-badge">'+t('vcSourceBadge')+'</span>':''}</div>
           <div class="vehicle-card-actions">
-            <label class="radio-row"><input type="radio" name="sourcePick" ${v.isSource?'checked':''} data-idx="${idx}" class="v-source"> Set as source</label>
-            <button type="button" class="btn ghost small danger v-remove" data-idx="${idx}">Remove</button>
+            <label class="radio-row"><input type="radio" name="sourcePick" ${v.isSource?'checked':''} data-idx="${idx}" class="v-source"> ${t('vcSetSource')}</label>
+            <button type="button" class="btn ghost small danger v-remove" data-idx="${idx}">${t('vcRemove')}</button>
           </div>
-        </div>
         </div>
         <div class="grid">
-          <div class="field"><label>Name</label><input type="text" class="v-name" data-idx="${idx}" value="${v.name||''}"></div>
-          <div class="field"><label>Fuel type</label>
+          <div class="field"><label>${t('vcName')}</label><input type="text" class="v-name" data-idx="${idx}" value="${v.name||''}"></div>
+          <div class="field"><label>${t('vcFuelType')}</label>
             <select class="v-fueltype" data-idx="${idx}">
-              <option value="electric" ${v.fuelType==='electric'?'selected':''}>Electric (kWh)</option>
-              <option value="liquid" ${v.fuelType==='liquid'?'selected':''}>Petrol/Diesel (L)</option>
+              <option value="electric" ${v.fuelType==='electric'?'selected':''}>${t('vcFuelElectric')}</option>
+              <option value="liquid" ${v.fuelType==='liquid'?'selected':''}>${t('vcFuelLiquid')}</option>
             </select>
           </div>
-          <div class="field"><label id="v-cons-label-${idx}">${v.fuelType==='electric'?'Consumption (kWh/100km)':'Consumption (L/100km)'}</label><input type="number" step="0.1" min="0" class="v-consumption" data-idx="${idx}" value="${v.consumption}"></div>
-          <div class="field"><label id="v-price-label-${idx}">${v.fuelType==='electric'?'Price (€/kWh)':'Price (€/L)'}</label><input type="number" step="0.01" min="0" class="v-price" data-idx="${idx}" value="${v.price}"></div>
-          <div class="field"><label>Insurance (€/year)</label><input type="number" step="1" min="0" class="v-insurance" data-idx="${idx}" value="${v.insurance}"></div>
-          <div class="field"><label>Maintenance (€/year)</label><input type="number" step="1" min="0" class="v-maintenance" data-idx="${idx}" value="${v.maintenance}"></div>
-          <div class="field"><label>Road tax (€/year)</label><input type="number" step="1" min="0" class="v-roadtax" data-idx="${idx}" value="${v.roadTax}"></div>
-          <div class="field"><label>Purchase price (€)</label><input type="number" step="1" min="0" class="v-purchase" data-idx="${idx}" value="${v.purchase}"></div>
-          <div class="field"><label>Resale value today (€)</label><input type="number" step="1" min="0" class="v-resale" data-idx="${idx}" value="${v.resale}"></div>
-          <div class="field"><label id="v-co2-label-${idx}">${v.fuelType==='electric'?'Grid emissions (kg CO2/kWh)':'Emissions (kg CO2/L)'}</label><input type="number" step="0.01" min="0" class="v-co2" data-idx="${idx}" value="${v.co2Factor}"></div>
+          <div class="field"><label id="v-cons-label-${idx}">${v.fuelType==='electric'?t('vcConsumptionElectric'):t('vcConsumptionLiquid')}</label><input type="number" step="0.1" min="0" class="v-consumption" data-idx="${idx}" value="${v.consumption}"></div>
+          <div class="field"><label id="v-price-label-${idx}">${v.fuelType==='electric'?t('vcPriceElectric'):t('vcPriceLiquid')}</label><input type="number" step="0.01" min="0" class="v-price" data-idx="${idx}" value="${v.price}"></div>
+          <div class="field"><label>${t('vcInsurance')}</label><input type="number" step="1" min="0" class="v-insurance" data-idx="${idx}" value="${v.insurance}"></div>
+          <div class="field"><label>${t('vcMaintenance')}</label><input type="number" step="1" min="0" class="v-maintenance" data-idx="${idx}" value="${v.maintenance}"></div>
+          <div class="field"><label>${t('vcRoadTax')}</label><input type="number" step="1" min="0" class="v-roadtax" data-idx="${idx}" value="${v.roadTax}"></div>
+          <div class="field"><label>${t('vcPurchase')}</label><input type="number" step="1" min="0" class="v-purchase" data-idx="${idx}" value="${v.purchase}"></div>
+          <div class="field"><label>${t('vcResale')}</label><input type="number" step="1" min="0" class="v-resale" data-idx="${idx}" value="${v.resale}"></div>
+          <div class="field"><label id="v-co2-label-${idx}">${v.fuelType==='electric'?t('vcCo2Electric'):t('vcCo2Liquid')}</label><input type="number" step="0.01" min="0" class="v-co2" data-idx="${idx}" value="${v.co2Factor}"></div>
         </div>
       `;
       container.appendChild(card);
@@ -799,7 +1065,7 @@
     }));
     container.querySelectorAll('.v-remove').forEach(el=>el.addEventListener('click',e=>{
       const idx = parseInt(e.target.dataset.idx,10);
-      if(draftVehicles.length<=2){ alert('Keep at least two vehicles — one source and one to compare against.'); return; }
+      if(draftVehicles.length<=2){ alert(t('alertKeepTwo')); return; }
       const wasSource = draftVehicles[idx].isSource;
       draftVehicles.splice(idx,1);
       if(wasSource) draftVehicles[0].isSource = true;
@@ -809,7 +1075,7 @@
 
   document.getElementById('addVehicleBtn').addEventListener('click', ()=>{
     draftVehicles.push({
-      id:'v'+Date.now(), name:'New vehicle', shape:'car', fuelType:'liquid',
+      id:'v'+Date.now(), name:t('vcNewVehicle'), shape:'car', fuelType:'liquid',
       consumption:6, price:1.75, insurance:200, maintenance:200, roadTax:0,
       purchase:0, resale:0, co2Factor:2.31, isSource:false
     });
@@ -832,8 +1098,17 @@
       document.getElementById(id).addEventListener('input', updateInfraPreview);
     });
     const syncEl = document.getElementById('syncStatus');
-    if(syncEl && syncEl.textContent.indexOf('Connecting')===0) syncEl.textContent = 'Connected to Google Sheets';
+    if(syncEl) syncEl.textContent = sheetConnected? t('syncConnected') : t('syncConnecting');
   }
+
+  applyI18n();
+  document.getElementById('langToggle').addEventListener('click', ()=>{
+    currentLang = currentLang==='en' ? 'pt' : 'en';
+    localStorage.setItem(LS_LANG, currentLang);
+    applyI18n();
+    if(sessionStorage.getItem(SS_AUTH)==='1') renderVehicleList();
+    render();
+  });
 
   document.getElementById('f-date').valueAsDate = new Date();
 
@@ -849,7 +1124,7 @@
       settings.compareVehicleId = firstNonSource? firstNonSource.id : settings.vehicles[0].id;
     }
     saveSettings(settings);
-    document.getElementById('settingsStatus').textContent = 'Saving…';
+    document.getElementById('settingsStatus').textContent = t('settingsSaving');
     populateCompareSelect();
     render();
     pushSettingsToSheet().then(()=>{
@@ -859,10 +1134,10 @@
 
   document.getElementById('changePwBtn').addEventListener('click', ()=>{
     const newPw = document.getElementById('s-newpw').value;
-    if(!newPw){ document.getElementById('pwChangeStatus').textContent='Enter a new password first.'; return; }
+    if(!newPw){ document.getElementById('pwChangeStatus').textContent=t('pwEnterNew'); return; }
     localStorage.setItem(LS_PASSWORD, newPw);
     document.getElementById('s-newpw').value='';
-    document.getElementById('pwChangeStatus').textContent='Password updated ✓';
+    document.getElementById('pwChangeStatus').textContent=t('pwUpdated');
     setTimeout(()=>document.getElementById('pwChangeStatus').textContent='',2000);
   });
 
@@ -884,11 +1159,11 @@
       .then(r=>r.json())
       .then(res=>{
         const el = document.getElementById('settingsStatus');
-        if(el) el.textContent = (res && res.status==='ok')? 'Saved ✓ (synced to Sheet)' : 'Saved locally — Sheet sync failed';
+        if(el) el.textContent = (res && res.status==='ok')? t('settingsSavedSynced') : t('settingsSavedFail');
       })
       .catch(()=>{
         const el = document.getElementById('settingsStatus');
-        if(el) el.textContent = 'Saved locally — Sheet sync failed';
+        if(el) el.textContent = t('settingsSavedFail');
       });
   }
 
@@ -916,31 +1191,43 @@
       .then(r=>r.json())
       .then(rows=>{
         entries = rows.map(r=>({
+          id: r.Timestamp!=null? String(r.Timestamp) : null,
           date: r.Date,
           odometer:Number(r.Odometer_km)||0,
           kwh: (r.kWh===''||r.kWh===undefined||r.kWh===null)? null : Number(r.kWh),
           fuelPrice: (r.Fuel_Price===''||r.Fuel_Price===undefined||r.Fuel_Price===null)? null : Number(r.Fuel_Price),
+          freeEnergy: r.Free_Energy===true || r.Free_Energy==='true',
           notes: r.Notes||''
         }));
         saveEntries(entries);
+        sheetConnected = true;
         const el = document.getElementById('syncStatus');
-        if(el) el.textContent = 'Connected to Google Sheets ✓';
+        if(el) el.textContent = t('syncConnected');
         render();
       })
-      .catch(()=>{ const el = document.getElementById('syncStatus'); if(el) el.textContent = 'Could not reach the sheet — check the URL/deployment'; });
+      .catch(()=>{ sheetConnected = false; const el = document.getElementById('syncStatus'); if(el) el.textContent = t('syncFail'); });
   }
 
   function pushToSheet(entry){
-    if(!settings.scriptUrl) return;
+    if(!settings.scriptUrl) return Promise.resolve();
     const params = new URLSearchParams({
       action:'add', date:entry.date, odometer:entry.odometer,
       kwh: entry.kwh==null? '' : entry.kwh,
       fuelPrice: entry.fuelPrice==null? '' : entry.fuelPrice,
+      freeEnergy: entry.freeEnergy? 'true' : 'false',
       notes: entry.notes||''
     });
-    fetch(settings.scriptUrl+'?'+params.toString()).catch(()=>{
-      document.getElementById('formStatus').textContent = 'Saved locally — sheet sync failed';
-    });
+    return fetch(settings.scriptUrl+'?'+params.toString())
+      .then(()=> fetchFromSheet()) // resync so the new entry gets its real server id (needed to delete it later)
+      .catch(()=>{
+        document.getElementById('formStatus').textContent = t('formStatusSyncFail');
+      });
+  }
+
+  function deleteFromSheet(id){
+    if(!settings.scriptUrl || !id) return Promise.resolve();
+    const params = new URLSearchParams({ action:'delete', entryId:id });
+    return fetch(settings.scriptUrl+'?'+params.toString()).catch(()=>{});
   }
 
   document.getElementById('entryForm').addEventListener('submit', function(e){
@@ -948,27 +1235,30 @@
     const kwhRaw = document.getElementById('f-kwh').value;
     const fuelRaw = document.getElementById('f-fuelprice').value;
     const entry = {
+      id: 'local-'+Date.now(), // placeholder until the sheet resync assigns the real id
       date: document.getElementById('f-date').value,
       odometer: parseFloat(document.getElementById('f-odo').value)||0,
       kwh: kwhRaw===''? null : parseFloat(kwhRaw),
       fuelPrice: fuelRaw===''? null : parseFloat(fuelRaw),
+      freeEnergy: document.getElementById('f-free-energy').checked,
       notes: document.getElementById('f-notes').value
     };
     entries.push(entry);
     entries.sort((a,b)=> new Date(a.date)-new Date(b.date) || a.odometer-b.odometer);
     saveEntries(entries);
-    pushToSheet(entry);
     this.reset();
     document.getElementById('f-date').valueAsDate = new Date();
-    document.getElementById('formStatus').textContent = 'Entry added ✓';
-    setTimeout(()=>{ document.getElementById('formStatus').innerHTML = 'Logging km for <strong id="formSourceName">'+getSourceVehicle().name+'</strong> — every other vehicle is calculated automatically.'; },2000);
+    document.getElementById('formStatus').textContent = t('formStatusAdded');
+    setTimeout(()=>{ document.getElementById('formStatus').innerHTML = tf('formStatusLogging',{name:'<strong id="formSourceName">'+getSourceVehicle().name+'</strong>'}); },2000);
     render();
+    pushToSheet(entry);
   });
 
-  function deleteEntry(idx){
-    entries.splice(idx,1);
+  function deleteEntry(id){
+    entries = entries.filter(e=> e.id!==id);
     saveEntries(entries);
     render();
+    deleteFromSheet(id);
   }
 
   function fmtEUR(n){ return '€' + (n||0).toLocaleString('en-IE',{minimumFractionDigits:2,maximumFractionDigits:2}); }
@@ -983,6 +1273,10 @@
   }
 
   function entryEnergyCost(vehicle, entry){
+    // free charging (e.g. bundled Supercharger km) zeroes the source vehicle's
+    // energy cost for this entry only — the comparison vehicle still costs as normal,
+    // since those km would still have needed fuel on the vehicle you didn't buy.
+    if(vehicle.isSource && entry.freeEnergy) return 0;
     // actual kWh logged only applies to the vehicle you really drive (the source);
     // hypothetical vehicles always use their own consumption rate.
     if(vehicle.fuelType==='electric'){
@@ -1039,6 +1333,65 @@
     });
   });
 
+  function projectBreakeven(remaining, fuelDailyRate, annualFixedDiff, spanDays, fixedCostYears){
+    // Fuel/energy savings accrue continuously (tied to km driven day by day).
+    // Insurance/maintenance/road-tax savings land in one lump at each yearly
+    // boundary (day 366, 731, ...) — matching how fixedCostYears charges them
+    // elsewhere, rather than smearing them into a daily average.
+    if(remaining<=0) return {days:0};
+    let cumulative = 0;
+    let daysFromNow = 0;
+    let boundaryYear = fixedCostYears;
+    let daysToNextBoundary = Math.max(1, boundaryYear*365 + 1 - spanDays);
+
+    for(let iter=0; iter<400; iter++){
+      if(fuelDailyRate>0){
+        const daysNeeded = (remaining-cumulative)/fuelDailyRate;
+        if(daysNeeded <= daysToNextBoundary){
+          return { days: daysFromNow + Math.max(0,daysNeeded) };
+        }
+      } else if(annualFixedDiff<=0){
+        return null; // nothing left that grows — will never reach it
+      }
+      cumulative += fuelDailyRate*daysToNextBoundary;
+      daysFromNow += daysToNextBoundary;
+      cumulative += annualFixedDiff;
+      if(cumulative >= remaining) return { days: daysFromNow };
+      boundaryYear++;
+      daysToNextBoundary = 365;
+    }
+    return null; // didn't resolve within ~400 years of boundaries — treat as never
+  }
+
+  function updateQuickCalc(){
+    const source = getSourceVehicle();
+    const compare = getCompareVehicle();
+    const km = parseFloat(document.getElementById('qc-km').value)||0;
+
+    // pure default-rate math — no per-entry overrides, no freeEnergy, nothing saved
+    function baseCost(vehicle){
+      return km * (vehicle.consumption/100) * vehicle.price;
+    }
+    const srcVal = baseCost(source);
+    const cmpVal = baseCost(compare);
+
+    document.getElementById('qcSrcLabel').textContent = source.name;
+    document.getElementById('qcCmpLabel').textContent = compare.name;
+    document.getElementById('qcSrcValue').textContent = fmtEUR(srcVal);
+    document.getElementById('qcCmpValue').textContent = fmtEUR(cmpVal);
+
+    const diff = cmpVal - srcVal;
+    const diffEl = document.getElementById('qcDiff');
+    if(km<=0){
+      diffEl.textContent = '';
+    } else if(diff>=0){
+      diffEl.innerHTML = tf('qcWouldSave', {name: source.name, amount: '<strong>'+fmtEUR(diff)+'</strong>', km: km.toLocaleString()});
+    } else {
+      diffEl.innerHTML = tf('qcWouldCost', {name: source.name, amount: '<strong>'+fmtEUR(Math.abs(diff))+'</strong>', km: km.toLocaleString()});
+    }
+  }
+  document.getElementById('qc-km').addEventListener('input', updateQuickCalc);
+
   function render(){
     const source = getSourceVehicle();
     const compare = getCompareVehicle();
@@ -1069,17 +1422,17 @@
     nsEl.textContent = (netSavings>=0? '+':'−') + fmtEUR(Math.abs(netSavings));
     nsEl.className = 'st-value mono ' + (netSavings>=0? 'pos':'neg');
     document.getElementById('netSavingsNote').textContent = entries.length
-      ? `Over ${totalKm.toLocaleString()} km · ${withKm.length} ${withKm.length===1?'entry':'entries'} logged`
-      : 'Log your first entry to start the count';
+      ? tf('msgOverKmEntries', {km: totalKm.toLocaleString(), count: withKm.length, word: t(withKm.length===1?'wordEntry':'wordEntries')})
+      : t('msgLogFirstEntry');
 
     /* ---- duel cards ---- */
     document.getElementById('srcCardName').textContent = source.name;
     document.getElementById('cmpCardName').textContent = compare.name;
-    document.getElementById('srcKm').textContent = `${totalKm.toLocaleString()} km driven`;
+    document.getElementById('srcKm').textContent = tf('kmDrivenLabel', {km: totalKm.toLocaleString()});
     document.getElementById('srcTotal').textContent = fmtEUR(srcCost.total);
     document.getElementById('cmpTotal').textContent = fmtEUR(cmpCost.total);
-    document.getElementById('srcEnergyLabel').textContent = source.fuelType==='electric'? 'Energy':'Fuel';
-    document.getElementById('cmpEnergyLabel').textContent = compare.fuelType==='electric'? 'Energy':'Fuel';
+    document.getElementById('srcEnergyLabel').textContent = t(source.fuelType==='electric'? 'lblEnergy':'lblFuel');
+    document.getElementById('cmpEnergyLabel').textContent = t(compare.fuelType==='electric'? 'lblEnergy':'lblFuel');
 
     const maxTotal = Math.max(srcCost.total, cmpCost.total, 1);
     setBar('srcEnergyBar','srcEnergyVal', srcCost.energy, maxTotal);
@@ -1109,30 +1462,40 @@
     const investRemaining = document.getElementById('investRemaining');
 
     if(source.purchase<=0 && infra<=0){
-      investEta.textContent = 'Set purchase price & resale value in Admin';
+      investEta.textContent = t('msgSetPurchasePrice');
       investBar.style.width='0%'; investPct.textContent='—'; investRemaining.textContent='';
     } else if(premium<=0){
-      investEta.textContent = `Already broke even — ${compare.name}'s resale covers the ${source.name} premium`;
+      investEta.textContent = tf('msgAlreadyBrokeEvenResale', {compare: compare.name, source: source.name});
       investBar.style.width='100%'; investPct.textContent='100%'; investRemaining.textContent='';
     } else {
       const pct = Math.min(100, (Math.max(0,netSavings)/premium)*100);
       investBar.style.width = pct.toFixed(1)+'%';
-      investPct.textContent = pct.toFixed(0)+'% of the way there';
+      investPct.textContent = tf('investPctWay', {pct: pct.toFixed(0)});
       if(netSavings<=0){
-        investRemaining.textContent = 'Not saving yet';
-        investEta.textContent = 'Running costs need to dip below the comparison vehicle\'s before a break-even date can be projected';
+        investRemaining.textContent = t('msgNotSavingYet');
+        investEta.textContent = t('msgNeedDipBelow');
       } else {
-        const dailyRate = netSavings/spanDays;
-        const daysRemaining = Math.max(0,(premium-netSavings)/dailyRate);
-        investRemaining.textContent = fmtEUR(Math.max(0,premium-netSavings)) + ' left';
-        if(daysRemaining<=0){
-          investEta.textContent = 'Already broke even 🎉';
+        const remaining = Math.max(0, premium-netSavings);
+        investRemaining.textContent = tf('msgLeft', {amount: fmtEUR(remaining)});
+
+        // continuous part: fuel/energy only, per day
+        const fuelDailyRate = (cmpCost.energy - srcCost.energy) / spanDays;
+        // lumpy part: the annual insurance+maintenance+tax gap, charged in full each year
+        const annualFixedDiff = (compare.insurance+compare.maintenance+compare.roadTax)
+                               - (source.insurance+source.maintenance+source.roadTax);
+
+        const projection = projectBreakeven(remaining, fuelDailyRate, annualFixedDiff, spanDays, fixedCostYears);
+        if(!projection){
+          investEta.textContent = t('msgGapWontClose');
+        } else if(projection.days<=0){
+          investEta.textContent = t('msgAlreadyBrokeEven');
         } else {
-          const etaDate = new Date(Date.now()+daysRemaining*86400000);
+          const etaDate = new Date(Date.now()+projection.days*86400000);
           const kmPerDay = totalKm/spanDays;
-          const kmRemaining = kmPerDay>0? Math.round(kmPerDay*daysRemaining) : null;
-          investEta.textContent = etaDate.toLocaleDateString('en-IE',{year:'numeric',month:'short',day:'numeric'})
-            + (kmRemaining!=null? ` · ~${kmRemaining.toLocaleString()} km away` : '');
+          const kmRemaining = kmPerDay>0? Math.round(kmPerDay*projection.days) : null;
+          const dateLocale = currentLang==='pt' ? 'pt-PT' : 'en-IE';
+          investEta.textContent = etaDate.toLocaleDateString(dateLocale,{year:'numeric',month:'short',day:'numeric'})
+            + (kmRemaining!=null? ` · ${tf('msgKmAway',{km:kmRemaining.toLocaleString()})}` : '');
         }
       }
     }
@@ -1141,9 +1504,11 @@
     const cmpCo2 = vehicleCO2(compare, totalKm);
     const srcCo2 = vehicleCO2(source, totalKm);
     const co2Avoided = cmpCo2 - srcCo2;
-    document.getElementById('co2CmpLabel').textContent = `${compare.name} would have emitted`;
-    document.getElementById('co2SrcLabel').textContent = `${source.name} emitted`;
-    document.getElementById('co2Total').textContent = Math.abs(co2Avoided).toLocaleString(undefined,{maximumFractionDigits:0}) + ' kg CO2' + (co2Avoided<0? ` more (${source.name} higher)`:' avoided');
+    document.getElementById('co2CmpLabel').textContent = tf('co2WouldHaveEmitted', {name: compare.name});
+    document.getElementById('co2SrcLabel').textContent = tf('co2Emitted', {name: source.name});
+    document.getElementById('co2Total').textContent = co2Avoided<0
+      ? tf('co2MoreHigher', {amount: Math.abs(co2Avoided).toLocaleString(undefined,{maximumFractionDigits:0}), name: source.name})
+      : tf('co2Avoided', {amount: Math.abs(co2Avoided).toLocaleString(undefined,{maximumFractionDigits:0})});
     document.getElementById('co2Cmp').textContent = cmpCo2.toLocaleString(undefined,{maximumFractionDigits:0}) + ' kg';
     document.getElementById('co2Src').textContent = srcCo2.toLocaleString(undefined,{maximumFractionDigits:0}) + ' kg';
     document.getElementById('co2PerKm').textContent = (totalKm? ((co2Avoided/totalKm)*1000).toFixed(0) : '0') + ' g/km';
@@ -1151,9 +1516,40 @@
     /* ---- history header ---- */
     document.getElementById('histSrcHeader').textContent = source.name+' €';
     document.getElementById('histCmpHeader').textContent = compare.name+' €';
+    document.getElementById('histSrcHeaderPublic').textContent = source.name+' €';
+    document.getElementById('histCmpHeaderPublic').textContent = compare.name+' €';
 
     renderHistory(withKm, source, compare, fixedCostYears);
     renderChart(withKm, source, compare, srcCost, cmpCost);
+    renderAllVehiclesTable(withKm, fixedCostYears, spanDays, source, compare);
+    updateQuickCalc();
+  }
+
+  function renderAllVehiclesTable(withKm, fixedCostYears, spanDays, source, compare){
+    const body = document.getElementById('allVehiclesBody');
+    body.innerHTML='';
+    const rows = settings.vehicles.map(v=>({ v, cost: vehicleCost(v, withKm, fixedCostYears) }));
+    rows.sort((a,b)=> a.cost.total - b.cost.total);
+    const totalKmAll = withKm.length? Math.max(0, withKm[withKm.length-1].odometer - settings.startOdometer) : 0;
+    rows.forEach(({v,cost})=>{
+      let badge = '';
+      if(v.isSource) badge = ` <span class="source-badge">${t('vcSourceBadge')}</span>`;
+      else if(v.id===compare.id) badge = ` <span class="compare-badge">${t('badgeComparing')}</span>`;
+      const perKm = totalKmAll? (cost.total/totalKmAll) : 0;
+      const perMonth = cost.total/Math.max(1,spanDays/30.44);
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${v.name}${badge}</td>
+        <td class="num">${fmtEUR(cost.total)}</td>
+        <td class="num">${fmtEUR(cost.energy)}</td>
+        <td class="num">${fmtEUR(cost.maint)}</td>
+        <td class="num">${fmtEUR(cost.ins)}</td>
+        <td class="num">${fmtEUR(cost.tax)}</td>
+        <td class="num">€${perKm.toFixed(3)}</td>
+        <td class="num">${fmtEUR(perMonth)}</td>
+      `;
+      body.appendChild(tr);
+    });
   }
 
   function setBar(barId,valId,val,max){
@@ -1164,27 +1560,41 @@
   function renderHistory(withKm, source, compare){
     const body = document.getElementById('historyBody');
     const empty = document.getElementById('emptyState');
-    body.innerHTML='';
-    if(!withKm.length){ empty.style.display='block'; return; }
+    const bodyPublic = document.getElementById('historyBodyPublic');
+    const emptyPublic = document.getElementById('emptyStatePublic');
+    body.innerHTML=''; bodyPublic.innerHTML='';
+
+    if(!withKm.length){
+      empty.style.display='block';
+      emptyPublic.style.display='block';
+      return;
+    }
     empty.style.display='none';
+    emptyPublic.style.display='none';
+
     [...withKm].reverse().forEach((e)=>{
-      const realIdx = entries.findIndex(x=> x.date===e.date && x.odometer===e.odometer && x.notes===e.notes);
       const srcCost = entryEnergyCost(source, e);
       const cmpCost = entryEnergyCost(compare, e);
-      const tr = document.createElement('tr');
-      tr.innerHTML = `
+      const srcLabel = e.freeEnergy? `${fmtEUR(srcCost)} <span title="Free charging for this entry" style="color:var(--tesla);">⚡free</span>` : fmtEUR(srcCost);
+      const rowCells = `
         <td>${e.date}</td>
         <td class="num">${e.odometer.toLocaleString()}</td>
         <td class="num">${e.kmDriven?.toLocaleString()||0}</td>
-        <td class="num">${fmtEUR(srcCost)}</td>
+        <td class="num">${srcLabel}</td>
         <td class="num">${fmtEUR(cmpCost)}</td>
         <td>${e.notes||''}</td>
-        <td><button class="row-del" data-idx="${realIdx}">remove</button></td>
       `;
+
+      const tr = document.createElement('tr');
+      tr.innerHTML = rowCells + `<td><button class="row-del" data-id="${e.id||''}">${t('btnRemove')}</button></td>`;
       body.appendChild(tr);
+
+      const trPublic = document.createElement('tr');
+      trPublic.innerHTML = rowCells;
+      bodyPublic.appendChild(trPublic);
     });
     body.querySelectorAll('.row-del').forEach(btn=>{
-      btn.addEventListener('click', ()=> deleteEntry(parseInt(btn.dataset.idx,10)));
+      btn.addEventListener('click', ()=> deleteEntry(btn.dataset.id));
     });
   }
 
@@ -1195,15 +1605,15 @@
     svgEl.setAttribute('preserveAspectRatio', chartType==='pie' ? 'xMidYMid meet' : 'none');
     legend.innerHTML='';
     if(chartType==='line'){
-      title.textContent = 'Cumulative savings over time';
+      title.textContent = t('chartTitleLine');
       renderTrend(withKm, source, compare);
     } else if(chartType==='bar'){
-      title.textContent = 'Cost breakdown — bars';
+      title.textContent = t('chartTitleBar');
       legend.innerHTML = `<span><span class="sw" style="background:var(--tesla);"></span>${source.name}</span><span><span class="sw" style="background:var(--panda);"></span>${compare.name}</span>`;
       renderBarChart(source, compare, srcCost, cmpCost);
     } else if(chartType==='pie'){
-      title.textContent = 'Cost breakdown — share of total';
-      legend.innerHTML = `<span><span class="sw" style="background:#3FE0C5;"></span>Energy/Fuel</span><span><span class="sw" style="background:#7FE9B0;"></span>Maintenance</span><span><span class="sw" style="background:#E8952B;"></span>Insurance</span><span><span class="sw" style="background:#E8574A;"></span>Road tax</span>`;
+      title.textContent = t('chartTitlePie');
+      legend.innerHTML = `<span><span class="sw" style="background:#3FE0C5;"></span>${t('thEnergyFuel')}</span><span><span class="sw" style="background:#7FE9B0;"></span>${t('lblMaintenance')}</span><span><span class="sw" style="background:#E8952B;"></span>${t('lblInsurance')}</span><span><span class="sw" style="background:#E8574A;"></span>${t('lblRoadTax')}</span>`;
       renderPieChart(source, compare, srcCost, cmpCost);
     }
   }
@@ -1246,10 +1656,10 @@
     svg.setAttribute('viewBox','0 0 '+w+' '+h);
     svg.innerHTML='';
     const cats = [
-      {label: source.fuelType==='electric'?'Energy':'Fuel', s:srcCost.energy, c:cmpCost.energy},
-      {label:'Maintenance', s:srcCost.maint, c:cmpCost.maint},
-      {label:'Insurance', s:srcCost.ins, c:cmpCost.ins},
-      {label:'Road tax', s:srcCost.tax, c:cmpCost.tax}
+      {label: t(source.fuelType==='electric'?'lblEnergy':'lblFuel'), s:srcCost.energy, c:cmpCost.energy},
+      {label:t('lblMaintenance'), s:srcCost.maint, c:cmpCost.maint},
+      {label:t('lblInsurance'), s:srcCost.ins, c:cmpCost.ins},
+      {label:t('lblRoadTax'), s:srcCost.tax, c:cmpCost.tax}
     ];
     const maxVal = Math.max(1, ...cats.map(c=>Math.max(c.s,c.c)));
     const groupW = w/cats.length;
